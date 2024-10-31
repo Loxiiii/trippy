@@ -11,7 +11,8 @@ export type Stop = {
     id: number;
     name: string;
     description: string;
-    coordinates: { x: number; y: number };
+    latitude: number;
+    longitude: number;
     nights: number;
 };
   

@@ -157,8 +157,8 @@ export default function TripPageClient({ tripImages, mapImageUrl, stops, comment
                       hoveredStop?.id === stop.id ? 'bg-primary text-primary-foreground scale-125' : 'bg-background text-primary'
                     }`}
                     style={{
-                      left: `${stop.coordinates.y}%`,
-                      top: `${stop.coordinates.x}%`,
+                      left: `${stop.latitude}%`,
+                      top: `${stop.longitude}%`,
                       transform: 'translate(-50%, -50%)',
                     }}
                   >
@@ -303,8 +303,8 @@ export default function TripPageClient({ tripImages, mapImageUrl, stops, comment
                   hoveredStop?.id === stop.id ? 'bg-primary text-primary-foreground scale-125' : 'bg-background text-primary'
                 }`}
                 style={{
-                  left: `${stop.coordinates.y}%`,
-                  top: `${stop.coordinates.x}%`,
+                  left: `${stop.latitude}%`,
+                  top: `${stop.longitude}%`,
                   transform: 'translate(-50%, -50%)',
                 }}
               >

@@ -21,14 +21,13 @@ export default async function TripPage({
     "/photo5.jpg",
     "/photo6.jpg",
     "/photo7.jpg",
-    "/photo8.jpg",
   ],
   mapImageUrl = "/map.jpg",
   stops = [
-    { id: 1, name: "Two Medicine Area", description: "Moody lodge under the trees", coordinates: { x: 48.8566, y: 2.3522 }, nights: 3 },
-    { id: 2, name: "Many Glacier", description: "Abundant glaciers year round", coordinates: { x: 41.9028, y: 12.4964 }, nights: 4 },
-    { id: 3, name: "Logan Pass", description: "Higuest point in the park", coordinates: { x: 41.3851, y: 2.1734 }, nights: 3 },
-    { id: 4, name: "Bison Fields", description: "Perfect for Wildlife photography", coordinates: { x: 52.3676, y: 4.9041 }, nights: 2 },
+    { id: 1, name: "Two Medicine Area", description: "Moody lodge under the trees", latitude: 48.8566, longitude: 2.3522, nights: 3 },
+    { id: 2, name: "Many Glacier", description: "Abundant glaciers year round", latitude: 41.9028, longitude: 12.4964 , nights: 4 },
+    { id: 3, name: "Logan Pass", description: "Higuest point in the park", latitude: 41.3851, longitude: 2.1734, nights: 3 },
+    { id: 4, name: "Bison Fields", description: "Perfect for Wildlife photography", latitude: 52.3676, longitude: 4.9041 , nights: 2 },
   ],
   user = {
     name: "Emily Traveler",
@@ -65,10 +64,9 @@ export default async function TripPage({
 
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore)
-  const tripId = await params.tripId;
-  const trip = await getTripById(tripId, supabase);
+  const id = await params.tripId;
+  const trip = await getTripById(id, supabase);
   const { description, title, header_image_url } = trip || {};
-  // const test = 'https://uxrptbgssryynqdgkqbn.supabase.co/storage/v1/object/public/TripHeaderImages/header.jpg'
 
   console.log('trip:', trip);
 
@@ -77,7 +75,7 @@ export default async function TripPage({
       <header className="mb-8">
         <div className="relative w-full h-[300px] overflow-hidden rounded-t-lg">
           <Image
-            src={header_image_url}
+            src={header_image_url || '/header.jpg'}
             alt="Trip header"
             layout="fill"
             objectFit="cover"
