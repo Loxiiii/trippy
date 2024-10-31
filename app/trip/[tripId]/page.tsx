@@ -3,40 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import TripPageClient from './trip-page-client'
+import { Trip, Stop, User, TripComment, TripPageProps} from '@/utils/types'
 
-type Stop = {
-  id: number;
-  name: string;
-  description: string;
-  coordinates: { x: number; y: number };
-  nights: number;
-};
-
-type User = {
-  name: string;
-  avatarUrl: string;
-  username: string;
-};
-
-type Comment = {
-  id: number;
-  user: User;
-  content: string;
-  likes: number;
-  replies: number;
-  timestamp: string;
-};
-
-type TripPageProps = {
-  title: string;
-  description: string;
-  headerImageUrl: string;
-  tripImages: string[];
-  mapImageUrl: string;
-  stops: Stop[];
-  user: User;
-  comments: Comment[];
-};
 
 export default function TripPage({ 
   title = "6 nights in Glacier National Park", 

@@ -1,0 +1,3 @@
+let getTripById = (tripId: number): => {
+
+}

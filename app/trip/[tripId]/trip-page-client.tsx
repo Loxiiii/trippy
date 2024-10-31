@@ -8,35 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-type Stop = {
-  id: number;
-  name: string;
-  description: string;
-  coordinates: { x: number; y: number };
-  nights: number;
-};
 
-type User = {
-  name: string;
-  avatarUrl: string;
-  username: string;
-};
-
-type Comment = {
-  id: number;
-  user: User;
-  content: string;
-  likes: number;
-  replies: number;
-  timestamp: string;
-};
-
-type TripPageClientProps = {
-  tripImages: string[];
-  mapImageUrl: string;
-  stops: Stop[];
-  comments: Comment[];
-};
 
 export default function TripPageClient({ tripImages, mapImageUrl, stops, comments }: TripPageClientProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
