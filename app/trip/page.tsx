@@ -93,26 +93,32 @@ export default function TripPage({
 }: TripPageProps) {
   return (
     <div className="container mx-auto p-4">
-      <header className="mb-8 relative">
-        <div className="relative w-full h-[300px] mb-16 overflow-hidden rounded-lg">
+      <header className="mb-8">
+        <div className="relative w-full h-[300px] overflow-hidden rounded-t-lg">
           <Image
             src={headerImageUrl}
             alt="Trip header"
             layout="fill"
             objectFit="cover"
+            priority
           />
-          <div className="absolute left-4 bottom-0 transform translate-y-1/2">
-            <Avatar className="w-24 h-24 border-4 border-background">
-              <AvatarImage src={user.avatarUrl} alt={user.name} />
-              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-          </div>
         </div>
-        <div className="flex justify-between items-end mt-2">
-          <div>
-            <h1 className="text-3xl font-bold">{title}</h1>
-            <div className="mt-1 text-lg text-muted-foreground">
-              <span className="font-semibold">{user.name}</span> • <span>{user.username}</span>
+        <div className="bg-background rounded-b-lg shadow-md">
+          <div className="container mx-auto px-4 py-6 flex items-center space-x-4">
+            <div className="relative w-24 h-24 -mt-16">
+              <Image
+                src={user.avatarUrl}
+                alt={user.name}
+                layout="fill"
+                objectFit="cover"
+                className="rounded-full border-4 border-background"
+              />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">{title}</h1>
+              <div className="mt-1 text-lg text-muted-foreground">
+                <span className="font-semibold">{user.name}</span> • <span>{user.username}</span>
+              </div>
             </div>
           </div>
         </div>
