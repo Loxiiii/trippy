@@ -52,12 +52,12 @@ export default function TripPage({
     "/photo7.jpg",
     "/photo8.jpg",
   ],
-  mapImageUrl = "/your-map-image.jpg",
+  mapImageUrl = "/map.jpg",
   stops = [
-    { id: 1, name: "Paris", description: "City of Lights", coordinates: { x: 48.8566, y: 2.3522 }, nights: 3 },
-    { id: 2, name: "Rome", description: "Eternal City", coordinates: { x: 41.9028, y: 12.4964 }, nights: 4 },
-    { id: 3, name: "Barcelona", description: "Gaudi's Playground", coordinates: { x: 41.3851, y: 2.1734 }, nights: 3 },
-    { id: 4, name: "Amsterdam", description: "Venice of the North", coordinates: { x: 52.3676, y: 4.9041 }, nights: 2 },
+    { id: 1, name: "Two Medicine Area", description: "Moody lodge under the trees", coordinates: { x: 48.8566, y: 2.3522 }, nights: 3 },
+    { id: 2, name: "Many Glacier", description: "Abundant glaciers year round", coordinates: { x: 41.9028, y: 12.4964 }, nights: 4 },
+    { id: 3, name: "Logan Pass", description: "Higuest point in the park", coordinates: { x: 41.3851, y: 2.1734 }, nights: 3 },
+    { id: 4, name: "Bison Fields", description: "Perfect for Wildlife photography", coordinates: { x: 52.3676, y: 4.9041 }, nights: 2 },
   ],
   user = {
     name: "Emily Traveler",
@@ -67,7 +67,7 @@ export default function TripPage({
   comments = [
     {
       id: 1,
-      user: { name: "Alex Adventure", avatarUrl: "/alex-avatar.jpg", username: "@alexadventure" },
+      user: { name: "Alex Adventure", avatarUrl: "/profile1.jpg", username: "@alexadventure" },
       content: "This trip looks amazing! I've been to Paris and it's absolutely stunning. Can't wait to see more of your photos!",
       likes: 15,
       replies: 2,
@@ -75,7 +75,7 @@ export default function TripPage({
     },
     {
       id: 2,
-      user: { name: "Sarah Nomad", avatarUrl: "/sarah-avatar.jpg", username: "@sarahnomad" },
+      user: { name: "Sarah Nomad", avatarUrl: "/fprofile3.jpg", username: "@sarahnomad" },
       content: "Barcelona is my favorite city! Make sure to visit La Sagrada Familia, it's breathtaking.",
       likes: 8,
       replies: 1,
@@ -83,7 +83,7 @@ export default function TripPage({
     },
     {
       id: 3,
-      user: { name: "Mike Backpacker", avatarUrl: "/mike-avatar.jpg", username: "@mikebackpacker" },
+      user: { name: "Mike Backpacker", avatarUrl: "/profile2.jpg", username: "@mikebackpacker" },
       content: "Great itinerary! How are you traveling between cities? Train or flights?",
       likes: 5,
       replies: 3,
