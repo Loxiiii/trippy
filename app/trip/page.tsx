@@ -40,7 +40,7 @@ type TripPageProps = {
 
 export default function TripPage({ 
   title = "6 nights in Glacier National Park", 
-  description = "An unforgettable journey through the heart of Europe, exploring iconic cities and hidden gems.",
+  description = "I recently had the chance to explore the stunning Glacier National Park. The hike to Hidden Lake was a particular highlight, with its winding trails, lush forests, and breathtaking views of snow-capped peaks. The park's diverse wildlife, from playful mountain goats to elusive bears, added to the adventure. It was a truly unforgettable experience.",
   headerImageUrl = "/header.jpg",
   tripImages = [
     "/photo1.jpg",
