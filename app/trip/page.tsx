@@ -39,7 +39,7 @@ type TripPageProps = {
 };
 
 export default function TripPage({ 
-  title = "Eurotrip Adventure 2023", 
+  title = "6 nights in Glacier National Park", 
   description = "An unforgettable journey through the heart of Europe, exploring iconic cities and hidden gems.",
   headerImageUrl = "/header.jpg",
   tripImages = [

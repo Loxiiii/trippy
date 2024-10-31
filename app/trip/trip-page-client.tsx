@@ -131,9 +131,8 @@ export default function TripPageClient({ tripImages, mapImageUrl, stops, comment
                   <Image
                     src={image}
                     alt={`Trip photo ${index + 1}`}
-                    layout="fill"
-                    objectFit="cover"
-                    className="rounded-lg"
+                    fill
+                    className="object-cover rounded-lg"
                   />
                 </CardContent>
               </Card>
@@ -176,9 +175,8 @@ export default function TripPageClient({ tripImages, mapImageUrl, stops, comment
                 <Image
                   src={mapImageUrl}
                   alt="Trip Map"
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-lg"
+                  fill
+                  className="object-cover rounded-lg"
                 />
                 {stops.map((stop) => (
                   <div
@@ -226,7 +224,7 @@ export default function TripPageClient({ tripImages, mapImageUrl, stops, comment
                     </Avatar>
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
-                        <h3  className="font-semibold">{comment.user.name}</h3>
+                        <h3 className="font-semibold">{comment.user.name}</h3>
                         <span className="text-sm text-muted-foreground">{comment.user.username}</span>
                         <span className="text-sm text-muted-foreground">•</span>
                         <span className="text-sm text-muted-foreground">{comment.timestamp}</span>
@@ -259,41 +257,53 @@ export default function TripPageClient({ tripImages, mapImageUrl, stops, comment
       </section>
 
       <Dialog open={selectedImageIndex !== null} onOpenChange={closeImageModal}>
-        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute right-2 top-2 z-10"
-            onClick={closeImageModal}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-          {selectedImageIndex !== null && (
-            <div className="relative w-full h-full flex items-center justify-center">
-              <Image
-                src={tripImages[selectedImageIndex]}
-                alt={`Trip photo ${selectedImageIndex + 1}`}
-                layout="fill"
-                objectFit="contain"
-              />
-              <Button
-                variant="outline"
-                size="icon"
-                className="absolute left-2 top-1/2 transform -translate-y-1/2"
-                onClick={prevImage}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                onClick={nextImage}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0">
+          <div className="relative w-full h-[90vh]">
+            {selectedImageIndex !== null && (
+              <>
+                <div className="absolute inset-0">
+                  <Image
+                    src={tripImages[selectedImageIndex]}
+                    alt={`Trip photo ${selectedImageIndex + 1}`}
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
+                    priority
+                  />
+                </div>
+                <div className="absolute top-2 right-2 z-10">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={closeImageModal}
+                    className="bg-background/80 backdrop-blur-sm"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="absolute inset-y-0 left-2 flex items-center">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={prevImage}
+                    className="bg-background/80 backdrop-blur-sm"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="absolute inset-y-0 right-2 flex items-center">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={nextImage}
+                    className="bg-background/80 backdrop-blur-sm"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -311,8 +321,8 @@ export default function TripPageClient({ tripImages, mapImageUrl, stops, comment
             <Image
               src={mapImageUrl}
               alt="Trip Map"
-              layout="fill"
-              objectFit="contain"
+              fill
+              className="object-contain"
             />
             {stops.map((stop) => (
               <div
