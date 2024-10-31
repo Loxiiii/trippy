@@ -9,58 +9,62 @@ import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 
 
-export default async function TripPage({ 
-  // title = "6 nights in Glacier National Park", 
-  // description = "I recently had the chance to explore the stunning Glacier National Park. The hike to Hidden Lake was a particular highlight, with its winding trails, lush forests, and breathtaking views of snow-capped peaks. The park's diverse wildlife, from playful mountain goats to elusive bears, added to the adventure. It was a truly unforgettable experience.",
-  params,
-  tripImages = [
-    "/photo1.jpg",
-    "/photo2.jpg",
-    "/photo3.jpg",
-    "/photo4.jpg",
-    "/photo5.jpg",
-    "/photo6.jpg",
-    "/photo7.jpg",
-  ],
-  mapImageUrl = "/map.jpg",
-  stops = [
-    { id: 1, name: "Two Medicine Area", description: "Moody lodge under the trees", latitude: 48.8566, longitude: 2.3522, nights: 3 },
-    { id: 2, name: "Many Glacier", description: "Abundant glaciers year round", latitude: 41.9028, longitude: 12.4964 , nights: 4 },
-    { id: 3, name: "Logan Pass", description: "Higuest point in the park", latitude: 41.3851, longitude: 2.1734, nights: 3 },
-    { id: 4, name: "Bison Fields", description: "Perfect for Wildlife photography", latitude: 52.3676, longitude: 4.9041 , nights: 2 },
-  ],
-  user = {
-    name: "Emily Traveler",
-    avatarUrl: "/Emily.jpg",
-    username: "@worldexplorer",
-  },
-  comments = [
-    {
-      id: 1,
-      user: { name: "Alex Adventure", avatarUrl: "/profile1.jpg", username: "@alexadventure" },
-      content: "This trip looks amazing! I've been to Paris and it's absolutely stunning. Can't wait to see more of your photos!",
-      likes: 15,
-      replies: 2,
-      timestamp: "2h ago"
+export default async function TripPage(props) {
+  const params = await props.params;
+
+  const {
+    tripImages = [
+      "/photo1.jpg",
+      "/photo2.jpg",
+      "/photo3.jpg",
+      "/photo4.jpg",
+      "/photo5.jpg",
+      "/photo6.jpg",
+      "/photo7.jpg",
+    ],
+
+    mapImageUrl = "/map.jpg",
+
+    stops = [
+      { id: 1, name: "Two Medicine Area", description: "Moody lodge under the trees", latitude: 48.8566, longitude: 2.3522, nights: 3 },
+      { id: 2, name: "Many Glacier", description: "Abundant glaciers year round", latitude: 41.9028, longitude: 12.4964 , nights: 4 },
+      { id: 3, name: "Logan Pass", description: "Higuest point in the park", latitude: 41.3851, longitude: 2.1734, nights: 3 },
+      { id: 4, name: "Bison Fields", description: "Perfect for Wildlife photography", latitude: 52.3676, longitude: 4.9041 , nights: 2 },
+    ],
+
+    user = {
+      name: "Emily Traveler",
+      avatarUrl: "/Emily.jpg",
+      username: "@worldexplorer",
     },
-    {
-      id: 2,
-      user: { name: "Sarah Nomad", avatarUrl: "/fprofile3.jpg", username: "@sarahnomad" },
-      content: "Barcelona is my favorite city! Make sure to visit La Sagrada Familia, it's breathtaking.",
-      likes: 8,
-      replies: 1,
-      timestamp: "1h ago"
-    },
-    {
-      id: 3,
-      user: { name: "Mike Backpacker", avatarUrl: "/profile2.jpg", username: "@mikebackpacker" },
-      content: "Great itinerary! How are you traveling between cities? Train or flights?",
-      likes: 5,
-      replies: 3,
-      timestamp: "30m ago"
-    }
-  ]
-}) {
+
+    comments = [
+      {
+        id: 1,
+        user: { name: "Alex Adventure", avatarUrl: "/profile1.jpg", username: "@alexadventure" },
+        content: "This trip looks amazing! I've been to Paris and it's absolutely stunning. Can't wait to see more of your photos!",
+        likes: 15,
+        replies: 2,
+        timestamp: "2h ago"
+      },
+      {
+        id: 2,
+        user: { name: "Sarah Nomad", avatarUrl: "/fprofile3.jpg", username: "@sarahnomad" },
+        content: "Barcelona is my favorite city! Make sure to visit La Sagrada Familia, it's breathtaking.",
+        likes: 8,
+        replies: 1,
+        timestamp: "1h ago"
+      },
+      {
+        id: 3,
+        user: { name: "Mike Backpacker", avatarUrl: "/profile2.jpg", username: "@mikebackpacker" },
+        content: "Great itinerary! How are you traveling between cities? Train or flights?",
+        likes: 5,
+        replies: 3,
+        timestamp: "30m ago"
+      }
+    ]
+  } = props;
 
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore)
