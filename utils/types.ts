@@ -2,6 +2,7 @@ export type Trip = {
     title: string, 
     description: string, 
     id: number, 
+    header_image_url: string,
     user_id: number, 
     created_at: Date
 }

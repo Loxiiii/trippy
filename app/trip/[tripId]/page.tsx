@@ -4,12 +4,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import TripPageClient from './trip-page-client'
 import { Trip, Stop, User, TripComment, TripPageProps} from '@/utils/types'
+import { getTripById } from '@/utils/controllers/tripController'
+import { createClient } from '@/utils/supabase/server'
+import { cookies } from 'next/headers'
 
 
-export default function TripPage({ 
-  title = "6 nights in Glacier National Park", 
-  description = "I recently had the chance to explore the stunning Glacier National Park. The hike to Hidden Lake was a particular highlight, with its winding trails, lush forests, and breathtaking views of snow-capped peaks. The park's diverse wildlife, from playful mountain goats to elusive bears, added to the adventure. It was a truly unforgettable experience.",
-  headerImageUrl = "/header.jpg",
+export default async function TripPage({ 
+  // title = "6 nights in Glacier National Park", 
+  // description = "I recently had the chance to explore the stunning Glacier National Park. The hike to Hidden Lake was a particular highlight, with its winding trails, lush forests, and breathtaking views of snow-capped peaks. The park's diverse wildlife, from playful mountain goats to elusive bears, added to the adventure. It was a truly unforgettable experience.",
+  params,
   tripImages = [
     "/photo1.jpg",
     "/photo2.jpg",
@@ -58,13 +61,23 @@ export default function TripPage({
       timestamp: "30m ago"
     }
   ]
-}: TripPageProps) {
+}) {
+
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore)
+  const tripId = await params.tripId;
+  const trip = await getTripById(tripId, supabase);
+  const { description, title, header_image_url } = trip || {};
+  // const test = 'https://uxrptbgssryynqdgkqbn.supabase.co/storage/v1/object/public/TripHeaderImages/header.jpg'
+
+  console.log('trip:', trip);
+
   return (
     <div className="container mx-auto p-4">
       <header className="mb-8">
         <div className="relative w-full h-[300px] overflow-hidden rounded-t-lg">
           <Image
-            src={headerImageUrl}
+            src={header_image_url}
             alt="Trip header"
             layout="fill"
             objectFit="cover"
