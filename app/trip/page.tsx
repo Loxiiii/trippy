@@ -61,7 +61,7 @@ export default function TripPage({
   ],
   user = {
     name: "Emily Traveler",
-    avatarUrl: "/user-avatar.jpg",
+    avatarUrl: "/Emily.jpg",
     username: "@worldexplorer",
   },
   comments = [
