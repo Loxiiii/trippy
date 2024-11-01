@@ -1,18 +1,13 @@
-// app/api/trip/[id].ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getTripById } from '@/utils/controllers/tripController';
 import { getTripStopsByTripId } from '@/utils/controllers/stopController';
 import { getProfileByUserId } from '@/utils/controllers/profileController';
-
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    // Extract the trip ID from the URL
-    // console.log('The request received is: ', request);
     const pathname = new URL(request.url).pathname;
     const idStr = pathname.split('/').pop();
     const id = idStr ? parseInt(idStr) : NaN;
-    // const { searchParams } = new URL(request.url);
-    // const id = searchParams.get('id');
+
     console.log('The params received are: ', id);
 
     if (!id) {

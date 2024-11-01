@@ -158,6 +158,17 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
     requestAnimationFrame(animate);
   };
 
+  const createInfoWindow = (content: string) => {
+    return new google.maps.InfoWindow({
+      content: `
+        <div class="bg-white p-2 rounded-lg shadow-lg text-sm font-semibold text-gray-800 min-w-[100px] text-center">
+          ${content}
+        </div>
+      `,
+      pixelOffset: new google.maps.Size(0, -20)
+    });
+  };
+
   const stopCoordinates = stops.map(stop => ({
     id: stop.id,
     latitude: stop.latitude,
@@ -182,7 +193,7 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
 
   const getColorForCategory = (category: string) => {
     const colorMap: Record<string, string> = {
-      food: '#f59e0b',
+      food: '#f5e0b',
       hike: '#10b981',
       shop: '#3b82f6',
       cultural_center: '#8b5cf6',
@@ -192,6 +203,21 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
     };
     return colorMap[category] || '#60a5fa';
   };
+
+  useEffect(() => {
+    if (hoveredId !== null && hoveredType !== null) {
+      const itemElement = document.querySelector(`[data-${hoveredType}-id="${hoveredId}"]`);
+      if (itemElement) {
+        itemElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        itemElement.classList.add('bg-primary/10', 'transition-colors', 'duration-300');
+      }
+      return () => {
+        if (itemElement) {
+          itemElement.classList.remove('bg-primary/10', 'transition-colors', 'duration-300');
+        }
+      };
+    }
+  }, [hoveredId, hoveredType]);
 
   return (
     <div className="w-full h-full">
@@ -215,6 +241,13 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
               marker.set('id', stop.id);
               marker.set('type', 'stop');
               markersRef.current[`stop-${stop.id}`] = marker;
+              const infoWindow = createInfoWindow(stop.name);
+              marker.addListener('mouseover', () => {
+                infoWindow.open(map, marker);
+              });
+              marker.addListener('mouseout', () => {
+                infoWindow.close();
+              });
             }}
           />
         ))}
@@ -230,6 +263,13 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
                   marker.set('id', poi.id);
                   marker.set('type', poi.category);
                   markersRef.current[`poi-${poi.id}`] = marker;
+                  const infoWindow = createInfoWindow(poi.name);
+                  marker.addListener('mouseover', () => {
+                    infoWindow.open(map, marker);
+                  });
+                  marker.addListener('mouseout', () => {
+                    infoWindow.close();
+                  });
                 }}
               />
               <Polyline
@@ -239,16 +279,16 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
                 ]}
                 options={{
                   strokeColor: getColorForCategory(poi.category),
-                  strokeOpacity: 0.5,
-                  strokeWeight: 1.5,
+                  strokeOpacity: 0.3,
+                  strokeWeight: 1,
                   icons: [{
                     icon: {
                       path: 'M 0,-1 0,1',
-                      strokeOpacity: 1,
-                      scale: 3
+                      strokeOpacity: 0.5,
+                      scale: 2
                     },
                     offset: '0',
-                    repeat: '10px'
+                    repeat: '20px'
                   }]
                 }}
                 onLoad={(polyline) => {

@@ -1,7 +1,9 @@
 import { Stop } from '@/utils/types';
-import { supabase } from '@/lib/supabaseClient';
+// import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/utils/supabase/server';
 
 export const getTripStopsByTripId = async (tripId: number): Promise<Stop[] | null> => {
+    const supabase = await createClient();
     const { data: stopsData, error: stopsError } = await supabase
         .from('stops')
         .select('*')

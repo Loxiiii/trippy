@@ -1,18 +1,19 @@
-import { Trip } from '@/utils/types'
-import { supabase } from '@/lib/supabaseClient';
+import { Trip } from '@/utils/types';
+import { createClient } from '@/utils/supabase/server';
 
-
-// utils/controllers/tripController.ts
 export const getTripById = async (tripId: number): Promise<Trip | null> => {
   try {
-    // console.log('The tripId received as argument is: ', tripId);
+    const supabase = await createClient();
+    console.log('Supabase client created:', supabase);
+    console.log('The tripId received as argument is: ', tripId);
+
     const { data, error } = await supabase
       .from('trips')
       .select('*')
       .eq('id', tripId)
-      .single(); // Use .single() if you expect only one result
+      .single();
 
-    // console.log('The data is: ', data);
+    console.log('The data is: ', data);
 
     if (error) {
       console.error('Error fetching trip:', error);

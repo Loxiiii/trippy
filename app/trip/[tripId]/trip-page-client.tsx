@@ -13,7 +13,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import MapComponent from "@/components/map"
+import { MapComponent } from "@/components/map"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 type Stop = {
@@ -310,7 +310,9 @@ export default function TripPageClient({
                                      value={`stop-${stop.id}`}
                                      onMouseEnter={() => handleHover(stop.id, 'stop')}
                                      onMouseLeave={handleHoverEnd}
-                                     className="transition-colors duration-300">
+                                     className="transition-colors duration-300"
+                                     data-stop-id={stop.id}
+                      >
                         <AccordionTrigger className="hover:no-underline hover:bg-muted/50 transition-colors">
                           <div className="flex items-start space-x-3">
                             <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-primary text-primary-foreground rounded-full">
@@ -348,6 +350,7 @@ export default function TripPageClient({
                                               className={`mb-4 last:mb-0 flex items-start rounded-md p-2 transition-colors ${hoverClass} cursor-pointer`}
                                               onMouseEnter={() => handleHover(poi.id, 'poi')}
                                               onMouseLeave={handleHoverEnd}
+                                              data-poi-id={poi.id}
                                             >
                                               <div className="flex-grow">
                                                 <h5 className="font-medium mb-1">{poi.name}</h5>
