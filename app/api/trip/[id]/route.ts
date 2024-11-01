@@ -40,7 +40,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     });
   } catch (error) {
     console.error('Error fetching trip:', error);
-    return NextResponse.json({ message: 'Error fetching trip', error: error.message }, {
+    return NextResponse.json({ message: 'Error fetching trip', error: (error as Error).message }, {
       status: 500,
       headers: {
         'Content-Type': 'application/json',

@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import TripPageClient from './trip-page-client'
-import { Trip, Stop, profile, TripComment, TripPageProps} from '@/utils/types'
+import { Trip, Stop, Profile, TripComment, TripPageProps} from '@/utils/types'
 import { getTripById } from '@/utils/controllers/tripController'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'

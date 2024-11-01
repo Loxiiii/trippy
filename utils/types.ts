@@ -16,7 +16,7 @@ export type Stop = {
     nights: number;
 };
   
-export type User = {
+export type Profile = {
     name: string;
     avatarUrl: string;
     username: string;
@@ -24,7 +24,7 @@ export type User = {
 
 export type TripComment = {
     id: number;
-    user: User;
+    profile: Profile;
     content: string;
     likes: number;
     replies: number;
@@ -38,7 +38,7 @@ export type TripPageProps = {
     tripImages: string[];
     mapImageUrl: string;
     stops: Stop[];
-    user: User;
+    profile: Profile;
     comments: Comment[];
 };
 
