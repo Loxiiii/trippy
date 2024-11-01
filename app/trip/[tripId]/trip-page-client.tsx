@@ -2,22 +2,118 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
-import { X, ChevronLeft, ChevronRight, Map, Heart, MessageCircle, Share2 } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Map, Heart, MessageCircle, Share2, Utensils, Footprints, ShoppingBag, Landmark, Building2, Mountain, Building } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 
+type Stop = {
+  id: number;
+  name: string;
+  description: string;
+  latitude: number;
+  longitude: number;
+  nights: number;
+  trip_id: number;
+  trip_stop_number: number;
+  pois: PointOfInterest[];
+};
 
+type User = {
+  name: string;
+  avatarUrl: string;
+  username: string;
+};
 
-export default function TripPageClient({ tripImages, mapImageUrl, stops, comments }: TripPageClientProps) {
+type Comment = {
+  id: number;
+  profile: User;
+  content: string;
+  likes: number;
+  replies: number;
+  timestamp: string;
+};
+
+type PointOfInterest = {
+  id: number;
+  stop_id: number;
+  trip_id: number;
+  name: string;
+  description: string;
+  latitude: number;
+  longitude: number;
+  photos: string[];
+  category: 'food' | 'hike' | 'shop' | 'cultural_center' | 'museum' | 'nature_sight' | 'urban_sight';
+};
+
+type TripPageClientProps = {
+  tripImages: string[];
+  mapImageUrl: string;
+  stops: Stop[];
+  comments: Comment[];
+  pois: PointOfInterest[];
+};
+
+const getCategoryIcon = (category: PointOfInterest['category']) => {
+  const iconMap: Record<PointOfInterest['category'], { icon: JSX.Element, className: string }> = {
+    food: { 
+      icon: <Utensils className="h-4 w-4" />,
+      className: "bg-amber-500"
+    },
+    hike: { 
+      icon: <Footprints className="h-4 w-4" />,
+      className: "bg-emerald-500"
+    },
+    shop: { 
+      icon: <ShoppingBag className="h-4 w-4" />,
+      className: "bg-blue-500"
+    },
+    cultural_center: { 
+      icon: <Landmark className="h-4 w-4" />,
+      className: "bg-purple-500"
+    },
+    museum: { 
+      icon: <Building2 className="h-4 w-4" />,
+      className: "bg-slate-500"
+    },
+    nature_sight: { 
+      icon: <Mountain className="h-4 w-4" />,
+      className: "bg-green-500"
+    },
+    urban_sight: { 
+      icon: <Building className="h-4 w-4" />,
+      className: "bg-zinc-500"
+    },
+  };
+
+  return iconMap[category] || { icon: null, className: "bg-primary" };
+};
+
+export default function TripPageClient({ 
+  tripImages = [], 
+  mapImageUrl = '', 
+  stops = [], 
+  comments = [],
+  pois = []
+}: TripPageClientProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
   const [isMapModalOpen, setIsMapModalOpen] = useState(false)
-  const [hoveredStop, setHoveredStop] = useState<Stop | null>(null)
   const carouselRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [startX, setStartX] = useState(0)
   const [scrollLeft, setScrollLeft] = useState(0)
+  const [selectedPOIPhotos, setSelectedPOIPhotos] = useState<{
+    poiId: number;
+    photos: string[];
+    selectedIndex: number;
+  } | null>(null);
 
   const openImageModal = (index: number) => setSelectedImageIndex(index)
   const closeImageModal = () => setSelectedImageIndex(null)
@@ -25,13 +121,13 @@ export default function TripPageClient({ tripImages, mapImageUrl, stops, comment
   const closeMapModal = () => setIsMapModalOpen(false)
 
   const nextImage = () => {
-    if (selectedImageIndex !== null) {
+    if (selectedImageIndex !== null && tripImages.length > 0) {
       setSelectedImageIndex((selectedImageIndex + 1) % tripImages.length)
     }
   }
 
   const prevImage = () => {
-    if (selectedImageIndex !== null) {
+    if (selectedImageIndex !== null && tripImages.length > 0) {
       setSelectedImageIndex((selectedImageIndex - 1 + tripImages.length) % tripImages.length)
     }
   }
@@ -48,8 +144,8 @@ export default function TripPageClient({ tripImages, mapImageUrl, stops, comment
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true)
-    setStartX(e.pageX - carouselRef.current!.offsetLeft)
-    setScrollLeft(carouselRef.current!.scrollLeft)
+    setStartX(e.pageX - (carouselRef.current?.offsetLeft || 0))
+    setScrollLeft(carouselRef.current?.scrollLeft || 0)
   }
 
   const handleMouseUp = () => {
@@ -59,10 +155,38 @@ export default function TripPageClient({ tripImages, mapImageUrl, stops, comment
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return
     e.preventDefault()
-    const x = e.pageX - carouselRef.current!.offsetLeft
+    const x = e.pageX - (carouselRef.current?.offsetLeft || 0)
     const walk = (x - startX) * 2
-    carouselRef.current!.scrollLeft = scrollLeft - walk
+    if (carouselRef.current) {
+      carouselRef.current.scrollLeft = scrollLeft - walk
+    }
   }
+
+  const openPOIPhotos = (poiId: number, photos: string[], initialIndex: number = 0) => {
+    setSelectedPOIPhotos({ poiId, photos, selectedIndex: initialIndex });
+  };
+
+  const closePOIPhotos = () => {
+    setSelectedPOIPhotos(null);
+  };
+
+  const nextPOIPhoto = () => {
+    if (selectedPOIPhotos && selectedPOIPhotos.photos.length > 0) {
+      setSelectedPOIPhotos({
+        ...selectedPOIPhotos,
+        selectedIndex: (selectedPOIPhotos.selectedIndex + 1) % selectedPOIPhotos.photos.length
+      });
+    }
+  };
+
+  const prevPOIPhoto = () => {
+    if (selectedPOIPhotos && selectedPOIPhotos.photos.length > 0) {
+      setSelectedPOIPhotos({
+        ...selectedPOIPhotos,
+        selectedIndex: (selectedPOIPhotos.selectedIndex - 1 + selectedPOIPhotos.photos.length) % selectedPOIPhotos.photos.length
+      });
+    }
+  };
 
   useEffect(() => {
     document.addEventListener('mouseup', handleMouseUp)
@@ -118,27 +242,78 @@ export default function TripPageClient({ tripImages, mapImageUrl, stops, comment
           <Card className="h-full">
             <CardContent className="p-6">
               <h2 className="text-2xl font-semibold mb-4">Itinerary</h2>
-              <ul className="space-y-4">
+              <Accordion type="single" collapsible className="w-full">
                 {stops.map((stop) => (
-                  <li 
-                    key={stop.id}
-                    className="rounded transition-colors duration-200 ease-in-out hover:bg-accent/50"
-                    onMouseEnter={() => setHoveredStop(stop)}
-                    onMouseLeave={() => setHoveredStop(null)}
-                  >
-                    <div className="flex items-start p-2">
-                      <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-primary text-primary-foreground rounded-full mr-3">
-                        {stop.id}
-                      </span>
-                      <div>
-                        <h3 className="font-semibold">{stop.name}</h3>
-                        <p className="text-sm text-muted-foreground">{stop.description}</p>
-                        <p className="text-sm font-medium mt-1">{stop.nights} {stop.nights === 1 ? 'night' : 'nights'}</p>
+                  <AccordionItem key={stop.id} value={`stop-${stop.id}`}>
+                    <AccordionTrigger className="hover:no-underline">
+                      <div className="flex items-start space-x-3">
+                        <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-primary text-primary-foreground rounded-full">
+                          {stop.id}
+                        </span>
+                        <div className="text-left">
+                          <h3 className="font-semibold">{stop.name}</h3>
+                          <p className="text-sm text-muted-foreground">{stop.nights} {stop.nights === 1 ? 'night' : 'nights'}</p>
+                          <p className="text-sm text-muted-foreground mt-1">{stop.description}</p>
+                        </div>
                       </div>
-                    </div>
-                  </li>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="pt-4 pl-11">
+                        {stop.pois && stop.pois.length > 0 ? (
+                          stop.pois.map((poi) => (
+                            <div key={poi.id} className="mb-6 last:mb-0 flex items-start">
+                              <div className="flex-grow">
+                                <h4 className="font-medium mb-2 flex items-center">
+                                  <span className={`inline-flex w-6 h-6 mr-2 items-center justify-center ${getCategoryIcon(poi.category).className} text-white rounded-full`}>
+                                    {getCategoryIcon(poi.category).icon}
+                                  </span>
+                                  {poi.name}
+                                </h4>
+                                <p className="text-sm text-muted-foreground mb-3">{poi.description}</p>
+                              </div>
+                              {poi.photos && poi.photos.length > 0 && (
+                                <div 
+                                  className="relative w-20 h-20 flex-shrink-0 cursor-pointer ml-4 mr-6"
+                                  onClick={() => openPOIPhotos(poi.id, poi.photos)}
+                                >
+                                  {poi.photos.slice(0, 3).map((photo, photoIndex) => (
+                                    <div
+                                      key={photoIndex}
+                                      className="absolute border-2 border-background rounded-xl overflow-hidden transition-transform hover:scale-105"
+                                      style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        top: `${photoIndex * 4}px`,
+                                        left: `${photoIndex * 4}px`,
+                                        zIndex: 3 - photoIndex,
+                                        transform: photoIndex === 0 ? 'rotate(-5deg)' : photoIndex === 1 ? 'rotate(0deg)' : 'rotate(5deg)',
+                                      }}
+                                    >
+                                      <Image
+                                        src={photo}
+                                        alt={`${poi.name} photo ${photoIndex + 1}`}
+                                        fill
+                                        className="object-cover"
+                                      />
+                                    </div>
+                                  ))}
+                                  {poi.photos.length > 3 && (
+                                    <div className="absolute bottom-0 right-0 bg-background text-foreground px-1 rounded-md text-xs font-medium">
+                                      +{poi.photos.length - 3}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-muted-foreground">No points of interest available for this stop.</p>
+                        )}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
                 ))}
-              </ul>
+              </Accordion>
             </CardContent>
           </Card>
           <div className="relative">
@@ -150,21 +325,6 @@ export default function TripPageClient({ tripImages, mapImageUrl, stops, comment
                   fill
                   className="object-cover rounded-lg"
                 />
-                {stops.map((stop) => (
-                  <div
-                    key={stop.id}
-                    className={`absolute w-6 h-6 rounded-full border-2 border-primary transition-all duration-200 ease-in-out flex items-center justify-center text-xs font-bold ${
-                      hoveredStop?.id === stop.id ? 'bg-primary text-primary-foreground scale-125' : 'bg-background text-primary'
-                    }`}
-                    style={{
-                      left: `${stop.latitude}%`,
-                      top: `${stop.longitude}%`,
-                      transform: 'translate(-50%, -50%)',
-                    }}
-                  >
-                    {stop.id}
-                  </div>
-                ))}
               </CardContent>
             </Card>
             <Button
@@ -197,7 +357,7 @@ export default function TripPageClient({ tripImages, mapImageUrl, stops, comment
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
                         <h3 className="font-semibold">{comment.profile.name}</h3>
-                        <span className="text-sm text-muted-foreground">{comment.profile.profilename}</span>
+                        <span className="text-sm text-muted-foreground">{comment.profile.username}</span>
                         <span className="text-sm text-muted-foreground">•</span>
                         <span className="text-sm text-muted-foreground">{comment.timestamp}</span>
                       </div>
@@ -231,7 +391,7 @@ export default function TripPageClient({ tripImages, mapImageUrl, stops, comment
       <Dialog open={selectedImageIndex !== null} onOpenChange={closeImageModal}>
         <DialogContent className="max-w-[95vw] max-h-[95vh] p-0">
           <div className="relative w-full h-[90vh]">
-            {selectedImageIndex !== null && (
+            {selectedImageIndex !== null && tripImages[selectedImageIndex] && (
               <>
                 <div className="absolute inset-0">
                   <Image
@@ -279,6 +439,69 @@ export default function TripPageClient({ tripImages, mapImageUrl, stops, comment
         </DialogContent>
       </Dialog>
 
+      <Dialog open={selectedPOIPhotos !== null} onOpenChange={closePOIPhotos}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0">
+          <div className="relative w-full h-[90vh]">
+            {selectedPOIPhotos && selectedPOIPhotos.photos[selectedPOIPhotos.selectedIndex] && (
+              <>
+                <div className="absolute inset-0">
+                  <Image
+                    src={selectedPOIPhotos.photos[selectedPOIPhotos.selectedIndex]}
+                    alt={`POI photo ${selectedPOIPhotos.selectedIndex + 1}`}
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
+                    priority
+                  />
+                </div>
+                <div className="absolute top-0 left-0 right-0 bg-background/80 backdrop-blur-sm p-4">
+                  <h3 className="text-lg font-semibold text-foreground">
+                    {stops.find(stop => stop.pois?.some(poi => poi.id === selectedPOIPhotos.poiId))?.pois?.find(poi => poi.id === selectedPOIPhotos.poiId)?.name}
+                  </h3>
+                </div>
+                <div className="absolute top-2 right-2 z-10">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={closePOIPhotos}
+                    className="bg-background/80 backdrop-blur-sm"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                {selectedPOIPhotos.photos.length > 1 && (
+                  <>
+                    <div className="absolute inset-y-0 left-2 flex items-center">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={prevPOIPhoto}
+                        className="bg-background/80 backdrop-blur-sm"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="absolute inset-y-0 right-2 flex items-center">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={nextPOIPhoto}
+                        className="bg-background/80 backdrop-blur-sm"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </>
+                )}
+                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm">
+                  {selectedPOIPhotos.selectedIndex + 1} / {selectedPOIPhotos.photos.length}
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={isMapModalOpen} onOpenChange={closeMapModal}>
         <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
           <Button
@@ -296,21 +519,6 @@ export default function TripPageClient({ tripImages, mapImageUrl, stops, comment
               fill
               className="object-contain"
             />
-            {stops.map((stop) => (
-              <div
-                key={stop.id}
-                className={`absolute w-6 h-6 rounded-full border-2 border-primary transition-all duration-200 ease-in-out flex items-center justify-center text-xs font-bold ${
-                  hoveredStop?.id === stop.id ? 'bg-primary text-primary-foreground scale-125' : 'bg-background text-primary'
-                }`}
-                style={{
-                  left: `${stop.latitude}%`,
-                  top: `${stop.longitude}%`,
-                  transform: 'translate(-50%, -50%)',
-                }}
-              >
-                {stop.id}
-              </div>
-            ))}
           </div>
         </DialogContent>
       </Dialog>

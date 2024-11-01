@@ -2,14 +2,36 @@ import { Stop } from '@/utils/types';
 import { supabase } from '@/lib/supabaseClient';
 
 export const getTripStopsByTripId = async (tripId: number): Promise<Stop[] | null> => {
-    const { data, error } = await supabase
+    const { data: stopsData, error: stopsError } = await supabase
         .from('stops')
         .select('*')
         .eq('trip_id', tripId)
         .order('trip_stop_number', { ascending: true });
-    if (error) {
-        console.error('Error fetching stops:', error);
+
+    if (stopsError) {
+        console.error('Error fetching stops:', stopsError);
         return null;
     }
-    return data;
-  }
+
+    if (!stopsData) {
+        return null;
+    }
+
+    const stopsWithPois = await Promise.all(stopsData.map(async (stop: Stop) => {
+        const { data: poisData, error: poisError } = await supabase
+            .from('pois')
+            .select('*')
+            .eq('stop_id', stop.id);
+
+        if (poisError) {
+            console.error(`Error fetching pois for stop ${stop.id}:`, poisError);
+            stop['pois'] = [];
+        } else {
+            stop['pois'] = poisData || [];
+        }
+
+        return stop;
+    }));
+
+    return stopsWithPois;
+}
