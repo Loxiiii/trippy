@@ -7,6 +7,7 @@ import { Trip, Stop, User, TripComment, TripPageProps} from '@/utils/types'
 import { getTripById } from '@/utils/controllers/tripController'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
+import { supabase } from '@/lib/supabaseClient';
 
 
 export default async function TripPage(props) {
@@ -66,13 +67,29 @@ export default async function TripPage(props) {
     ]
   } = props;
 
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore)
+  const getRequestTrip = async (tripId: number) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/trip/${tripId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('Trip Route Data:', data);
+      return data;
+    } catch (error) {
+      console.error('Error fetching trip route:', error);
+    }
+  };
+
   const id = await params.tripId;
-  const trip = await getTripById(id, supabase);
+  const { trip, stops: tripStops } = await getRequestTrip(id);
+
+  // const cookieStore = await cookies();
+  // const supabase = createClient(cookieStore)
+  // const id = await params.tripId;
+  // const trip = await getTripById(id, supabase);
   const { description, title, header_image_url } = trip || {};
 
-  console.log('trip:', trip);
 
   return (
     <div className="container mx-auto p-4">
@@ -118,7 +135,7 @@ export default async function TripPage(props) {
       <TripPageClient 
         tripImages={tripImages}
         mapImageUrl={mapImageUrl}
-        stops={stops}
+        stops={tripStops}
         comments={comments}
       />
     </div>
