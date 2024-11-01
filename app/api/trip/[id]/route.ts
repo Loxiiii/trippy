@@ -1,6 +1,7 @@
 // app/api/trip/[id].ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getTripById } from '@/utils/controllers/tripController';
+import { getTripStopsByTripId } from '@/utils/controllers/stopController';
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
@@ -27,7 +28,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ message: 'Trip not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ message: 'Trip fetched successfully', trip }, {
+    const stops = await getTripStopsByTripId(id);
+
+    return NextResponse.json({ message: 'Trip fetched successfully', trip, stops }, {
       status: 200,
       headers: {
         'Content-Type': 'application/json',

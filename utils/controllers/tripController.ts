@@ -1,19 +1,11 @@
 import { Trip } from '@/utils/types'
-import { FunctionsFetchError } from '@supabase/supabase-js'
-// import { supabase } from '@/lib/supabaseClient';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+import { supabase } from '@/lib/supabaseClient';
 
 
 // utils/controllers/tripController.ts
 export const getTripById = async (tripId: number): Promise<Trip | null> => {
   try {
     console.log('The tripId received as argument is: ', tripId);
-
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
     const { data, error } = await supabase
       .from('trips')
       .select('*')
