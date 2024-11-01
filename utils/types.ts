@@ -14,6 +14,21 @@ export type Stop = {
     latitude: number;
     longitude: number;
     nights: number;
+    pois: Poi[]
+};
+
+export type Poi = {
+    id: number;
+    name: string;
+    description: string;
+    latitude: number;
+    longitude: number;
+    stop_id: number;
+    category: string;
+    created_at: Date;
+    updated_at: Date;
+    user_id: number;
+    images: string[];
 };
   
 export type Profile = {
