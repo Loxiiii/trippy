@@ -8,6 +8,7 @@ import { getTripById } from '@/utils/controllers/tripController'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import { supabase } from '@/lib/supabaseClient';
+import { MapProvider } from "@/providers/map-provider";
 
 
 export default async function TripPage(props) {
@@ -61,7 +62,7 @@ export default async function TripPage(props) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log('Trip Route Data:', data);
+      // console.log('Trip Route Data:', data);
       return data;
     } catch (error) {
       console.error('Error fetching trip route:', error);
@@ -79,52 +80,55 @@ export default async function TripPage(props) {
 
 
   return (
-    <div className="container mx-auto p-4">
-      <header className="mb-8">
-        <div className="relative w-full h-[300px] overflow-hidden rounded-t-lg">
-          <Image
-            src={header_image_url || '/header.jpg'}
-            alt="Trip header"
-            layout="fill"
-            objectFit="cover"
-            priority
-          />
-        </div>
-        <div className="bg-background rounded-b-lg shadow-md">
-          <div className="container mx-auto px-4 py-6 flex items-center space-x-4">
-            <div className="relative w-24 h-24 -mt-16">
-              <Image
-                src={profile.avatar_url}
-                alt={profile.name}
-                layout="fill"
-                objectFit="cover"
-                className="rounded-full border-4 border-background"
-              />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold">{title}</h1>
-              <div className="mt-1 text-lg text-muted-foreground">
-                <span className="font-semibold">{profile.name}</span> • <span>{`@ ${profile.username}`}</span>
+    <MapProvider>
+
+      <div className="container mx-auto p-4">
+        <header className="mb-8">
+          <div className="relative w-full h-[300px] overflow-hidden rounded-t-lg">
+            <Image
+              src={header_image_url || '/header.jpg'}
+              alt="Trip header"
+              layout="fill"
+              objectFit="cover"
+              priority
+            />
+          </div>
+          <div className="bg-background rounded-b-lg shadow-md">
+            <div className="container mx-auto px-4 py-6 flex items-center space-x-4">
+              <div className="relative w-24 h-24 -mt-16">
+                <Image
+                  src={profile.avatar_url}
+                  alt={profile.name}
+                  layout="fill"
+                  objectFit="cover"
+                  className="rounded-full border-4 border-background"
+                />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold">{title}</h1>
+                <div className="mt-1 text-lg text-muted-foreground">
+                  <span className="font-semibold">{profile.name}</span> • <span>{`@ ${profile.username}`}</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <section className="mb-8">
-        <Card className="h-full">
-          <CardContent className="prose max-w-none p-6">
-            <p>{description}</p>
-          </CardContent>
-        </Card>
-      </section>
+        <section className="mb-8">
+          <Card className="h-full">
+            <CardContent className="prose max-w-none p-6">
+              <p>{description}</p>
+            </CardContent>
+          </Card>
+        </section>
 
-      <TripPageClient 
-        tripImages={tripImages}
-        mapImageUrl={mapImageUrl}
-        stops={stops}
-        comments={comments}
-      />
-    </div>
+        <TripPageClient 
+          tripImages={tripImages}
+          mapImageUrl={mapImageUrl}
+          stops={stops}
+          comments={comments}
+        />
+      </div>
+    </MapProvider>
   )
 }

@@ -7,7 +7,7 @@ const getTripRoute = async (tripId: number) => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log('Trip Route Data:', data);
+    //   console.log('Trip Route Data:', data);
       return data;
     } catch (error) {
       console.error('Error fetching trip route:', error);

@@ -7,7 +7,7 @@ import { getProfileByUserId } from '@/utils/controllers/profileController';
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // Extract the trip ID from the URL
-    console.log('The request received is: ', request);
+    // console.log('The request received is: ', request);
     const pathname = new URL(request.url).pathname;
     const idStr = pathname.split('/').pop();
     const id = idStr ? parseInt(idStr) : NaN;
