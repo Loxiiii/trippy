@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
-import { X, ChevronLeft, ChevronRight, Map, Heart, MessageCircle, Share2, Utensils, Footprints, ShoppingBag, Landmark, Building2, Mountain, Building } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Map, Heart, MessageCircle, Share2, Utensils, Footprints, ShoppingBag, Landmark, Building2, Mountain, Building, ChevronDown } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
@@ -285,62 +285,73 @@ export default function TripPageClient({
                       </AccordionTrigger>
                       <AccordionContent>
                         <div className="pt-4 pl-11">
-                          {Object.entries(groupedPOIs).map(([category, pois]) => (
-                            <div key={category} className="mb-6 last:mb-0">
-                              <h4 className="font-semibold mb-2 flex items-center">
-                                <span className={`inline-flex w-6 h-6 mr-2 items-center justify-center ${getCategoryIcon(category as PointOfInterest['category']).className} text-white rounded-full`}>
-                                  {getCategoryIcon(category as PointOfInterest['category']).icon}
-                                </span>
-                                {getCategoryIcon(category as PointOfInterest['category']).label}
-                              </h4>
-                              {pois.map((poi) => (
-                                <div 
-                                  key={poi.id} 
-                                  className={`mb-4 last:mb-0 flex items-start rounded-md p-2 transition-colors ${getCategoryIcon(poi.category).hoverClass}`}
-                                >
-                                  <div className="flex-grow">
-                                    <h5 className="font-medium mb-1">{poi.name}</h5>
-                                    <p className="text-sm text-muted-foreground mb-2">{poi.description}</p>
-                                  </div>
-                                  {poi.photos && poi.photos.length > 0 && (
-                                    <div 
-                                      className="relative w-20 h-20 flex-shrink-0 cursor-pointer ml-4"
-                                      onClick={() => openPOIPhotos(poi.id, poi.photos)}
-                                    >
-                                      {poi.photos.slice(0, 3).map((photo, photoIndex) => (
-                                        <div
-                                          key={photoIndex}
-                                          className="absolute border-2 border-background rounded-xl overflow-hidden transition-transform hover:scale-105"
-                                          style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            top: `${photoIndex * 4}px`,
-                                            left: `${photoIndex * 4}px`,
-                                            zIndex: 3 - photoIndex,
-                                            transform: photoIndex === 0 ? 'rotate(-5deg)' : photoIndex === 1 ? 'rotate(0deg)' : 'rotate(5deg)',
-                                          }}
-                                        >
-                                          <Image
-                                            src={photo}
-                                            alt={`${poi.name} photo ${photoIndex + 1}`}
-                                            fill
-                                            className="object-cover"
-                                          />
-                                        </div>
-                                      ))}
-                                      {poi.photos.length > 3 && (
-                                        <div className="absolute bottom-0 right-0 bg-background text-foreground px-1 rounded-md text-xs font-medium">
-                                          +{poi.photos.length - 3}
-                                        </div>
-                                      )}
+                          <Accordion type="multiple" className="w-full">
+                            {Object.entries(groupedPOIs).map(([category, pois]) => {
+                              if (pois.length === 0) return null;
+                              const { icon, className, hoverClass, label } = getCategoryIcon(category as PointOfInterest['category']);
+                              return (
+                                <AccordionItem key={category} value={`${stop.id}-${category}`}>
+                                  <AccordionTrigger className={`hover:no-underline rounded-md transition-colors ${hoverClass}`}>
+                                    <div className="flex items-center space-x-2">
+                                      <span className={`inline-flex w-6 h-6 items-center justify-center ${className} text-white rounded-full`}>
+                                        {icon}
+                                      </span>
+                                      <span>{label}</span>
+                                      <span className="text-sm text-muted-foreground">({pois.length})</span>
                                     </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          ))}
+                                  </AccordionTrigger>
+                                  <AccordionContent>
+                                    {pois.map((poi) => (
+                                      <div 
+                                        key={poi.id} 
+                                        className={`mb-4 last:mb-0 flex items-start rounded-md p-2 transition-colors ${hoverClass}`}
+                                      >
+                                        <div className="flex-grow">
+                                          <h5 className="font-medium mb-1">{poi.name}</h5>
+                                          <p className="text-sm text-muted-foreground mb-2">{poi.description}</p>
+                                        </div>
+                                        {poi.photos && poi.photos.length > 0 && (
+                                          <div 
+                                            className="relative w-20 h-20 flex-shrink-0 cursor-pointer ml-4"
+                                            onClick={() => openPOIPhotos(poi.id, poi.photos)}
+                                          >
+                                            {poi.photos.slice(0, 3).map((photo, photoIndex) => (
+                                              <div
+                                                key={photoIndex}
+                                                className="absolute border-2 border-background rounded-xl overflow-hidden transition-transform hover:scale-105"
+                                                style={{
+                                                  width: '100%',
+                                                  height: '100%',
+                                                  top: `${photoIndex * 4}px`,
+                                                  left: `${photoIndex * 4}px`,
+                                                  zIndex: 3 - photoIndex,
+                                                  transform: photoIndex === 0 ? 'rotate(-5deg)' : photoIndex === 1 ? 'rotate(0deg)' : 'rotate(5deg)',
+                                                }}
+                                              >
+                                                <Image
+                                                  src={photo}
+                                                  alt={`${poi.name} photo ${photoIndex + 1}`}
+                                                  fill
+                                                  className="object-cover"
+                                                />
+                                              </div>
+                                            
+                                            ))}
+                                            {poi.photos.length > 3 && (
+                                              <div className="absolute bottom-0 right-0 bg-background text-foreground px-1 rounded-md text-xs font-medium">
+                                                +{poi.photos.length - 3}
+                                              </div>
+                                            )}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </AccordionContent>
+                                </AccordionItem>
+                              );
+                            })}
+                          </Accordion>
                         </div>
-                      
                       </AccordionContent>
                     </AccordionItem>
                   );
