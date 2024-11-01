@@ -62,38 +62,52 @@ type TripPageClientProps = {
 };
 
 const getCategoryIcon = (category: PointOfInterest['category']) => {
-  const iconMap: Record<PointOfInterest['category'], { icon: JSX.Element, className: string }> = {
+  const iconMap: Record<PointOfInterest['category'], { icon: JSX.Element, className: string, hoverClass: string, label: string }> = {
     food: { 
       icon: <Utensils className="h-4 w-4" />,
-      className: "bg-amber-500"
+      className: "bg-amber-500",
+      hoverClass: "hover:bg-amber-100",
+      label: "Food"
     },
     hike: { 
       icon: <Footprints className="h-4 w-4" />,
-      className: "bg-emerald-500"
+      className: "bg-emerald-500",
+      hoverClass: "hover:bg-emerald-100",
+      label: "Hike"
     },
     shop: { 
       icon: <ShoppingBag className="h-4 w-4" />,
-      className: "bg-blue-500"
+      className: "bg-blue-500",
+      hoverClass: "hover:bg-blue-100",
+      label: "Shop"
     },
     cultural_center: { 
       icon: <Landmark className="h-4 w-4" />,
-      className: "bg-purple-500"
+      className: "bg-purple-500",
+      hoverClass: "hover:bg-purple-100",
+      label: "Cultural Center"
     },
     museum: { 
       icon: <Building2 className="h-4 w-4" />,
-      className: "bg-slate-500"
+      className: "bg-slate-500",
+      hoverClass: "hover:bg-slate-100",
+      label: "Museum"
     },
     nature_sight: { 
       icon: <Mountain className="h-4 w-4" />,
-      className: "bg-green-500"
+      className: "bg-green-500",
+      hoverClass: "hover:bg-green-100",
+      label: "Nature Sight"
     },
     urban_sight: { 
       icon: <Building className="h-4 w-4" />,
-      className: "bg-zinc-500"
+      className: "bg-zinc-500",
+      hoverClass: "hover:bg-zinc-100",
+      label: "Urban Sight"
     },
   };
 
-  return iconMap[category] || { icon: null, className: "bg-primary" };
+  return iconMap[category] || { icon: null, className: "bg-primary", hoverClass: "hover:bg-primary-100", label: "Other" };
 };
 
 export default function TripPageClient({ 
@@ -193,6 +207,16 @@ export default function TripPageClient({
     return () => document.removeEventListener('mouseup', handleMouseUp)
   }, [])
 
+  const groupPOIsByCategory = (pois: PointOfInterest[]) => {
+    return pois.reduce((acc, poi) => {
+      if (!acc[poi.category]) {
+        acc[poi.category] = [];
+      }
+      acc[poi.category].push(poi);
+      return acc;
+    }, {} as Record<PointOfInterest['category'], PointOfInterest[]>);
+  };
+
   return (
     <>
       <section className="mb-8 relative">
@@ -243,76 +267,84 @@ export default function TripPageClient({
             <CardContent className="p-6">
               <h2 className="text-2xl font-semibold mb-4">Itinerary</h2>
               <Accordion type="single" collapsible className="w-full">
-                {stops.map((stop) => (
-                  <AccordionItem key={stop.id} value={`stop-${stop.id}`}>
-                    <AccordionTrigger className="hover:no-underline">
-                      <div className="flex items-start space-x-3">
-                        <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-primary text-primary-foreground rounded-full">
-                          {stop.id}
-                        </span>
-                        <div className="text-left">
-                          <h3 className="font-semibold">{stop.name}</h3>
-                          <p className="text-sm text-muted-foreground">{stop.nights} {stop.nights === 1 ? 'night' : 'nights'}</p>
-                          <p className="text-sm text-muted-foreground mt-1">{stop.description}</p>
+                {stops.map((stop) => {
+                  const groupedPOIs = groupPOIsByCategory(stop.pois);
+                  return (
+                    <AccordionItem key={stop.id} value={`stop-${stop.id}`}>
+                      <AccordionTrigger className="hover:no-underline hover:bg-muted/50 transition-colors">
+                        <div className="flex items-start space-x-3">
+                          <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-primary text-primary-foreground rounded-full">
+                            {stop.id}
+                          </span>
+                          <div className="text-left">
+                            <h3 className="font-semibold">{stop.name}</h3>
+                            <p className="text-sm text-muted-foreground">{stop.nights} {stop.nights === 1 ? 'night' : 'nights'}</p>
+                            <p className="text-sm text-muted-foreground mt-1">{stop.description}</p>
+                          </div>
                         </div>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="pt-4 pl-11">
-                        {stop.pois && stop.pois.length > 0 ? (
-                          stop.pois.map((poi) => (
-                            <div key={poi.id} className="mb-6 last:mb-0 flex items-start">
-                              <div className="flex-grow">
-                                <h4 className="font-medium mb-2 flex items-center">
-                                  <span className={`inline-flex w-6 h-6 mr-2 items-center justify-center ${getCategoryIcon(poi.category).className} text-white rounded-full`}>
-                                    {getCategoryIcon(poi.category).icon}
-                                  </span>
-                                  {poi.name}
-                                </h4>
-                                <p className="text-sm text-muted-foreground mb-3">{poi.description}</p>
-                              </div>
-                              {poi.photos && poi.photos.length > 0 && (
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="pt-4 pl-11">
+                          {Object.entries(groupedPOIs).map(([category, pois]) => (
+                            <div key={category} className="mb-6 last:mb-0">
+                              <h4 className="font-semibold mb-2 flex items-center">
+                                <span className={`inline-flex w-6 h-6 mr-2 items-center justify-center ${getCategoryIcon(category as PointOfInterest['category']).className} text-white rounded-full`}>
+                                  {getCategoryIcon(category as PointOfInterest['category']).icon}
+                                </span>
+                                {getCategoryIcon(category as PointOfInterest['category']).label}
+                              </h4>
+                              {pois.map((poi) => (
                                 <div 
-                                  className="relative w-20 h-20 flex-shrink-0 cursor-pointer ml-4 mr-6"
-                                  onClick={() => openPOIPhotos(poi.id, poi.photos)}
+                                  key={poi.id} 
+                                  className={`mb-4 last:mb-0 flex items-start rounded-md p-2 transition-colors ${getCategoryIcon(poi.category).hoverClass}`}
                                 >
-                                  {poi.photos.slice(0, 3).map((photo, photoIndex) => (
-                                    <div
-                                      key={photoIndex}
-                                      className="absolute border-2 border-background rounded-xl overflow-hidden transition-transform hover:scale-105"
-                                      style={{
-                                        width: '100%',
-                                        height: '100%',
-                                        top: `${photoIndex * 4}px`,
-                                        left: `${photoIndex * 4}px`,
-                                        zIndex: 3 - photoIndex,
-                                        transform: photoIndex === 0 ? 'rotate(-5deg)' : photoIndex === 1 ? 'rotate(0deg)' : 'rotate(5deg)',
-                                      }}
+                                  <div className="flex-grow">
+                                    <h5 className="font-medium mb-1">{poi.name}</h5>
+                                    <p className="text-sm text-muted-foreground mb-2">{poi.description}</p>
+                                  </div>
+                                  {poi.photos && poi.photos.length > 0 && (
+                                    <div 
+                                      className="relative w-20 h-20 flex-shrink-0 cursor-pointer ml-4"
+                                      onClick={() => openPOIPhotos(poi.id, poi.photos)}
                                     >
-                                      <Image
-                                        src={photo}
-                                        alt={`${poi.name} photo ${photoIndex + 1}`}
-                                        fill
-                                        className="object-cover"
-                                      />
-                                    </div>
-                                  ))}
-                                  {poi.photos.length > 3 && (
-                                    <div className="absolute bottom-0 right-0 bg-background text-foreground px-1 rounded-md text-xs font-medium">
-                                      +{poi.photos.length - 3}
+                                      {poi.photos.slice(0, 3).map((photo, photoIndex) => (
+                                        <div
+                                          key={photoIndex}
+                                          className="absolute border-2 border-background rounded-xl overflow-hidden transition-transform hover:scale-105"
+                                          style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            top: `${photoIndex * 4}px`,
+                                            left: `${photoIndex * 4}px`,
+                                            zIndex: 3 - photoIndex,
+                                            transform: photoIndex === 0 ? 'rotate(-5deg)' : photoIndex === 1 ? 'rotate(0deg)' : 'rotate(5deg)',
+                                          }}
+                                        >
+                                          <Image
+                                            src={photo}
+                                            alt={`${poi.name} photo ${photoIndex + 1}`}
+                                            fill
+                                            className="object-cover"
+                                          />
+                                        </div>
+                                      ))}
+                                      {poi.photos.length > 3 && (
+                                        <div className="absolute bottom-0 right-0 bg-background text-foreground px-1 rounded-md text-xs font-medium">
+                                          +{poi.photos.length - 3}
+                                        </div>
+                                      )}
                                     </div>
                                   )}
                                 </div>
-                              )}
+                              ))}
                             </div>
-                          ))
-                        ) : (
-                          <p className="text-sm text-muted-foreground">No points of interest available for this stop.</p>
-                        )}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
+                          ))}
+                        </div>
+                      
+                      </AccordionContent>
+                    </AccordionItem>
+                  );
+                })}
               </Accordion>
             </CardContent>
           </Card>
