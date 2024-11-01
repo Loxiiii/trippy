@@ -191,13 +191,13 @@ export default function TripPageClient({ tripImages, mapImageUrl, stops, comment
                 <li key={comment.id}>
                   <div className="flex items-start space-x-4">
                     <Avatar>
-                      <AvatarImage src={comment.user.avatarUrl} alt={comment.user.name} />
-                      <AvatarFallback>{comment.user.name.charAt(0)}</AvatarFallback>
+                      <AvatarImage src={comment.profile.avatarUrl} alt={comment.profile.name} />
+                      <AvatarFallback>{comment.profile.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
-                        <h3 className="font-semibold">{comment.user.name}</h3>
-                        <span className="text-sm text-muted-foreground">{comment.user.username}</span>
+                        <h3 className="font-semibold">{comment.profile.name}</h3>
+                        <span className="text-sm text-muted-foreground">{comment.profile.profilename}</span>
                         <span className="text-sm text-muted-foreground">•</span>
                         <span className="text-sm text-muted-foreground">{comment.timestamp}</span>
                       </div>

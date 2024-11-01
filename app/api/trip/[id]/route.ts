@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTripById } from '@/utils/controllers/tripController';
 import { getTripStopsByTripId } from '@/utils/controllers/stopController';
+import { getProfileByUserId } from '@/utils/controllers/profileController';
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
@@ -29,8 +30,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     const stops = await getTripStopsByTripId(id);
+    const profile = await getProfileByUserId(trip.user_id);
 
-    return NextResponse.json({ message: 'Trip fetched successfully', trip, stops }, {
+    return NextResponse.json({ message: 'Trip fetched successfully', trip, stops, profile }, {
       status: 200,
       headers: {
         'Content-Type': 'application/json',

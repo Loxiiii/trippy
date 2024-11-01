@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import TripPageClient from './trip-page-client'
-import { Trip, Stop, User, TripComment, TripPageProps} from '@/utils/types'
+import { Trip, Stop, profile, TripComment, TripPageProps} from '@/utils/types'
 import { getTripById } from '@/utils/controllers/tripController'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
@@ -26,23 +26,10 @@ export default async function TripPage(props) {
 
     mapImageUrl = "/map.jpg",
 
-    stops = [
-      { id: 1, name: "Two Medicine Area", description: "Moody lodge under the trees", latitude: 48.8566, longitude: 2.3522, nights: 3 },
-      { id: 2, name: "Many Glacier", description: "Abundant glaciers year round", latitude: 41.9028, longitude: 12.4964 , nights: 4 },
-      { id: 3, name: "Logan Pass", description: "Higuest point in the park", latitude: 41.3851, longitude: 2.1734, nights: 3 },
-      { id: 4, name: "Bison Fields", description: "Perfect for Wildlife photography", latitude: 52.3676, longitude: 4.9041 , nights: 2 },
-    ],
-
-    user = {
-      name: "Emily Traveler",
-      avatarUrl: "/Emily.jpg",
-      username: "@worldexplorer",
-    },
-
     comments = [
       {
         id: 1,
-        user: { name: "Alex Adventure", avatarUrl: "/profile1.jpg", username: "@alexadventure" },
+        profile: { name: "Alex Adventure", avatarUrl: "/profile1.jpg", profilename: "@alexadventure" },
         content: "This trip looks amazing! I've been to Paris and it's absolutely stunning. Can't wait to see more of your photos!",
         likes: 15,
         replies: 2,
@@ -50,7 +37,7 @@ export default async function TripPage(props) {
       },
       {
         id: 2,
-        user: { name: "Sarah Nomad", avatarUrl: "/fprofile3.jpg", username: "@sarahnomad" },
+        profile: { name: "Sarah Nomad", avatarUrl: "/fprofile3.jpg", profilename: "@sarahnomad" },
         content: "Barcelona is my favorite city! Make sure to visit La Sagrada Familia, it's breathtaking.",
         likes: 8,
         replies: 1,
@@ -58,7 +45,7 @@ export default async function TripPage(props) {
       },
       {
         id: 3,
-        user: { name: "Mike Backpacker", avatarUrl: "/profile2.jpg", username: "@mikebackpacker" },
+        profile: { name: "Mike Backpacker", avatarUrl: "/profile2.jpg", profilename: "@mikebackpacker" },
         content: "Great itinerary! How are you traveling between cities? Train or flights?",
         likes: 5,
         replies: 3,
@@ -82,7 +69,7 @@ export default async function TripPage(props) {
   };
 
   const id = await params.tripId;
-  const { trip, stops: tripStops } = await getRequestTrip(id);
+  const { trip, stops, profile } = await getRequestTrip(id);
 
   // const cookieStore = await cookies();
   // const supabase = createClient(cookieStore)
@@ -107,8 +94,8 @@ export default async function TripPage(props) {
           <div className="container mx-auto px-4 py-6 flex items-center space-x-4">
             <div className="relative w-24 h-24 -mt-16">
               <Image
-                src={user.avatarUrl}
-                alt={user.name}
+                src={profile.avatar_url}
+                alt={profile.name}
                 layout="fill"
                 objectFit="cover"
                 className="rounded-full border-4 border-background"
@@ -117,7 +104,7 @@ export default async function TripPage(props) {
             <div>
               <h1 className="text-3xl font-bold">{title}</h1>
               <div className="mt-1 text-lg text-muted-foreground">
-                <span className="font-semibold">{user.name}</span> • <span>{user.username}</span>
+                <span className="font-semibold">{profile.name}</span> • <span>{`@ ${profile.username}`}</span>
               </div>
             </div>
           </div>
@@ -135,7 +122,7 @@ export default async function TripPage(props) {
       <TripPageClient 
         tripImages={tripImages}
         mapImageUrl={mapImageUrl}
-        stops={tripStops}
+        stops={stops}
         comments={comments}
       />
     </div>

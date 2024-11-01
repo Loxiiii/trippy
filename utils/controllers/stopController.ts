@@ -1,4 +1,4 @@
-import { Stop, Trip } from '@/utils/types';
+import { Stop } from '@/utils/types';
 import { supabase } from '@/lib/supabaseClient';
 
 export const getTripStopsByTripId = async (tripId: number): Promise<Stop[] | null> => {
