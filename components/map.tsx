@@ -15,7 +15,7 @@ const defaultMapOptions = {
   zoomControl: true,
   tilt: 0,
   gestureHandling: 'greedy',
-  mapTypeId: 'satellite',
+  mapTypeId: 'roadmap',
   disableDefaultUI: true,
 };
 
@@ -36,32 +36,61 @@ const createMarkerIcon = (id: number, category: string | null, isHovered: boolea
 
   const getIcon = () => {
     if (category === null) {
+      // Stop marker with centered number
+      const size = isHovered ? 40 : 32;
       return `
-        <text x="16" y="22" font-size="16" font-weight="bold" text-anchor="middle" fill="white">${id}</text>
+        <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.3"/>
+            </filter>
+          </defs>
+          <circle cx="${size/2}" cy="${size/2}" r="${size/2-2}" fill="white" filter="url(#shadow)"/>
+          <circle cx="${size/2}" cy="${size/2}" r="${size/2-4}" fill="${getColor()}"/>
+          <text 
+            x="${size/2}" 
+            y="${size/2}" 
+            font-family="Arial, sans-serif"
+            font-size="${size/2}"
+            font-weight="bold"
+            fill="white"
+            text-anchor="middle"
+            dominant-baseline="central"
+          >${id}</text>
+        </svg>
       `;
     }
+
+    // POI marker with icon
+    const size = isHovered ? 32 : 24;
+    const iconSize = size * 0.5;
     const iconMap: Record<string, string> = {
-      food: 'M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z',
-      hike: 'M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7',
-      shop: 'M17.21 9l-4.38-6.56c-.19-.28-.51-.42-.83-.42-.32 0-.64.14-.83.43L6.79 9H2c-.55 0-1 .45-1 1 0 .09.01.18.04.27l2.54 9.27c.23.84 1 1.46 1.92 1.46h13c.92 0 1.69-.62 1.93-1.46l2.54-9.27L23 10c0-.55-.45-1-1-1h-4.79zM9 9l3-4.4L15 9H9zm3 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z',
-      cultural_center: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.49L17.5 6.5 9.99 9.99 6.5 17.5zm5.5-6.6c.61 0 1.1.49 1.1 1.1s-.49 1.1-1.1 1.1-1.1-.49-1.1-1.1.49-1.1 1.1-1.1z',
-      museum: 'M22 11V9L12 2 2 9v2h2v9H2v2h20v-2h-2v-9h2zm-6 7h-4v-5h4v5z',
-      nature_sight: 'M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z',
-      urban_sight: 'M15 11V5l-3-3-3 3v2H3v14h18V11h-6zm-8 8H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm6 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm6 12h-2v-2h2v2zm0-4h-2v-2h2v2z',
+      food: 'M12,2A3,3,0,0,0,9,5V8H7V5A3,3,0,0,0,1,5V8A3,3,0,0,0,4,11V22H8V11A3,3,0,0,0,11,8V5A3,3,0,0,0,12,2M16,2A3,3,0,0,0,13,5V8H15V5A1,1,0,0,1,17,5V8H19V5A3,3,0,0,0,16,2M22,19H14V22H22V19Z',
+      hike: 'M13.5,5.5C14.59,5.5 15.5,4.58 15.5,3.5C15.5,2.38 14.59,1.5 13.5,1.5C12.39,1.5 11.5,2.38 11.5,3.5C11.5,4.58 12.39,5.5 13.5,5.5M9.8,8.9L7,23H9.1L10.9,15L13,17V23H15V15.5L12.9,13.5L13.5,10.5C14.8,12 16.8,13 19,13V11C17.1,11 15.5,10 14.7,8.6L13.7,7C13.3,6.4 12.7,6 12,6C11.7,6 11.5,6.1 11.2,6.1L6,8.3V13H8V9.6L9.8,8.9M13,1.5',
+      shop: 'M19 6H17C17 3.2 14.8 1 12 1S7 3.2 7 6H5C3.9 6 3 6.9 3 8V20C3 21.1 3.9 22 5 22H19C20.1 22 21 21.1 21 20V8C21 6.9 20.1 6 19 6M12 3C13.7 3 15 4.3 15 6H9C9 4.3 10.3 3 12 3M19 20H5V8H19V20M12 12C10.3 12 9 10.7 9 9H7C7 11.8 9.2 14 12 14S17 11.8 17 9H15C15 10.7 13.7 12 12 12Z',
+      cultural_center: 'M12,3L1,9L12,15L21,10.09V17H23V9M5,13.18V17.18L12,21L19,17.18V13.18L12,17L5,13.18Z',
+      museum: 'M12,0L3,5V7H21V5M5,9V21H8V9M10,9V21H14V9M16,9V21H19V9',
+      nature_sight: 'M14,6L10.25,11L13.1,14.8L11.5,16C9.81,13.75 7,10 7,10L1,18H23L14,6Z',
+      urban_sight: 'M15,11V5L12,2L9,5V7H3V21H21V11H15M7,19H5V17H7V19M7,15H5V13H7V15M7,11H5V9H7V11M13,19H11V17H13V19M13,15H11V13H13V15M13,11H11V9H13V11M13,7H11V5H13V7M19,19H17V17H19V19M19,15H17V13H19V15Z',
     };
+
     return `
-      <path d="${iconMap[category] || 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z'}" fill="white" />
+      <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.3"/>
+          </filter>
+        </defs>
+        <circle cx="${size/2}" cy="${size/2}" r="${size/2-2}" fill="white" filter="url(#shadow)"/>
+        <circle cx="${size/2}" cy="${size/2}" r="${size/2-4}" fill="${getColor()}"/>
+        <g transform="translate(${(size-iconSize)/2}, ${(size-iconSize)/2}) scale(${iconSize/24})">
+          <path d="${iconMap[category]}" fill="white"/>
+        </g>
+      </svg>
     `;
   };
 
-  const size = category === null ? (isHovered ? 40 : 32) : (isHovered ? 24 : 20);
-  const svg = `
-    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="${size/2}" cy="${size/2}" r="${size/2}" fill="${category === null ? '#000000' : getColor()}" />
-      <g transform="translate(${size/2 - 12}, ${size/2 - 12}) scale(${category === null ? 1 : 0.75})">${getIcon()}</g>
-    </svg>
-  `;
-  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(getIcon())}`;
 };
 
 const lightenColor = (color: string, amount: number): string => {
@@ -210,8 +239,17 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
                 ]}
                 options={{
                   strokeColor: getColorForCategory(poi.category),
-                  strokeOpacity: 0.8,
-                  strokeWeight: 2,
+                  strokeOpacity: 0.5,
+                  strokeWeight: 1.5,
+                  icons: [{
+                    icon: {
+                      path: 'M 0,-1 0,1',
+                      strokeOpacity: 1,
+                      scale: 3
+                    },
+                    offset: '0',
+                    repeat: '10px'
+                  }]
                 }}
                 onLoad={(polyline) => {
                   linesRef.current[`poi-${poi.id}`] = polyline;
