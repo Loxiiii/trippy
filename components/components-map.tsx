@@ -45,9 +45,9 @@ const createMarkerIcon = (id: number, category: string | null, isHovered: boolea
           </defs>
           <circle cx="${size/2}" cy="${size/2}" r="${size/2-2}" fill="white" filter="url(#shadow)"/>
           <circle cx="${size/2}" cy="${size/2}" r="${size/2-4}" fill="${getColor()}"/>
-          <text
-            x="${size/2}"
-            y="${size/2}"
+          <text 
+            x="${size/2}" 
+            y="${size/2}" 
             font-family="Arial, sans-serif"
             font-size="${size/2}"
             font-weight="bold"
@@ -104,7 +104,7 @@ const getColorForCategory = (category: string) => {
   return colorMap[category] || '#60a5fa';
 };
 
-export default function MapComponent({ stops, center, bounds, hoveredId, hoveredType }: { stops: any[], center: { lat: number, lng: number }, bounds: { north: number, south: number, east: number, west: number }, hoveredId: number | null, hoveredType: 'stop' | 'poi' | null }) {
+export function Map({ stops, center, bounds, hoveredId, hoveredType }: { stops: any[], center: { lat: number, lng: number }, bounds: { north: number, south: number, east: number, west: number }, hoveredId: number | null, hoveredType: 'stop' | 'poi' | null }) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const markersRef = useRef<{ [key: string]: google.maps.Marker }>({});
@@ -147,7 +147,7 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
       const markerType = marker.get('type');
       const isHovered = hoveredId === markerId && hoveredType === markerType;
       marker.setIcon(createMarkerIcon(markerId, markerType === 'stop' ? null : markerType, isHovered));
-
+      
       if (isHovered) {
         marker.setZIndex(1000);
         animateMarker(marker);
@@ -178,7 +178,7 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
   const stopCoordinates = stops.map(stop => ({
     id: stop.id,
     latitude: stop.latitude,
-    longitude: stop.longitude,
+    longitude: stop.longitude, 
     name: stop.name
   }));
 
@@ -367,7 +367,7 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
         {hoveredPOI && (
           <InfoWindow
             position={{ lat: hoveredPOI.latitude, lng: hoveredPOI.longitude }}
-            options={{
+            options={{ 
               pixelOffset: new window.google.maps.Size(0, -20),
               disableAutoPan: false,
               maxWidth: 300,
@@ -385,7 +385,7 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
                 <div className="flex items-start gap-4">
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold mb-2">{hoveredPOI.name}</h3>
-                    <Badge
+                    <Badge 
                       variant="secondary"
                       className="mb-2"
                       style={{
@@ -406,7 +406,7 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
                     </div>
                   </div>
                   {hoveredPOI.photos && hoveredPOI.photos.length > 0 && (
-                    <div
+                    <div 
                       className="relative w-20 h-20 rounded-md overflow-hidden cursor-pointer"
                       onClick={() => openPOIPhotos(hoveredPOI)}
                     >
@@ -424,8 +424,8 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
                     </div>
                   )}
                 </div>
-                <Button
-                  variant="secondary"
+                <Button 
+                  variant="secondary" 
                   className="w-full mt-4"
                   onClick={() => openPOIPhotos(hoveredPOI)}
                 >
@@ -482,7 +482,7 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
             </div>
             <div className="w-full md:w-1/3 p-6">
               <ScrollArea className="h-[calc(70vh-4rem)]">
-                <Badge
+                <Badge 
                   variant="secondary"
                   className="mb-4"
                   style={{
