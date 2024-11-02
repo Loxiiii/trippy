@@ -1,7 +1,11 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react';
-import { GoogleMap, Marker, Polyline } from "@react-google-maps/api";
+import Image from 'next/image';
+import { GoogleMap, Marker, Polyline, InfoWindow } from "@react-google-maps/api";
+import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const defaultMapContainerStyle = {
   width: '100%',
@@ -23,15 +27,15 @@ const createMarkerIcon = (id: number, category: string | null, isHovered: boolea
   const getColor = () => {
     if (category === null) return isHovered ? "#000000" : "#333333";
     const colorMap: Record<string, string> = {
-      food: '#FF9800',        // Orange
-      hike: '#4CAF50',        // Green
-      shop: '#2196F3',        // Blue
-      cultural_center: '#E91E63', // Pink
-      museum: '#9C27B0',      // Purple
-      nature_sight: '#FFEB3B', // Yellow
-      urban_sight: '#00BCD4', // Cyan
+      food: '#f59e0b',
+      hike: '#10b981',
+      shop: '#3b82f6',
+      cultural_center: '#8b5cf6',
+      museum: '#64748b',
+      nature_sight: '#22c55e',
+      urban_sight: '#71717a',
     };
-    return isHovered ? colorMap[category] : lightenColor(colorMap[category] || '#607D8B', 20);
+    return isHovered ? colorMap[category] : lightenColor(colorMap[category] || '#60a5fa', 20);
   };
 
   const getIcon = () => {
@@ -102,6 +106,14 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const markersRef = useRef<{ [key: string]: google.maps.Marker }>({});
   const linesRef = useRef<{ [key: string]: google.maps.Polyline }>({});
+  const [hoveredPOI, setHoveredPOI] = useState<any | null>(null);
+  const [isPOILocked, setIsPOILocked] = useState(false);
+  const [selectedPOIPhotos, setSelectedPOIPhotos] = useState<{
+    poiId: number;
+    photos: string[];
+    selectedIndex: number;
+  } | null>(null);
+  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (map) {
@@ -158,17 +170,6 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
     requestAnimationFrame(animate);
   };
 
-  const createInfoWindow = (content: string) => {
-    return new google.maps.InfoWindow({
-      content: `
-        <div class="bg-white p-2 rounded-lg shadow-lg text-sm font-semibold text-gray-800 min-w-[100px] text-center">
-          ${content}
-        </div>
-      `,
-      pixelOffset: new google.maps.Size(0, -20)
-    });
-  };
-
   const stopCoordinates = stops.map(stop => ({
     id: stop.id,
     latitude: stop.latitude,
@@ -184,7 +185,8 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
         latitude: poi.latitude,
         longitude: poi.longitude,
         category: poi.category,
-        stopId: stop.id
+        stopId: stop.id,
+        photos: poi.photos
       }))
     );
   };
@@ -193,35 +195,85 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
 
   const getColorForCategory = (category: string) => {
     const colorMap: Record<string, string> = {
-      food: '#FF9800',        // Orange
-      hike: '#4CAF50',        // Green
-      shop: '#2196F3',        // Blue
-      cultural_center: '#E91E63', // Pink
-      museum: '#9C27B0',      // Purple
-      nature_sight: '#FFEB3B', // Yellow
-      urban_sight: '#00BCD4', // Cyan
+      food: '#f59e0b',
+      hike: '#10b981',
+      shop: '#3b82f6',
+      cultural_center: '#8b5cf6',
+      museum: '#64748b',
+      nature_sight: '#22c55e',
+      urban_sight: '#71717a',
     };
-    return colorMap[category] || '#607D8B'; // Default to a neutral blue-grey
+    return colorMap[category] || '#60a5fa';
+  };
+
+  const openPOIPhotos = (poiId: number, photos: string[], initialIndex: number = 0) => {
+    setSelectedPOIPhotos({ poiId, photos, selectedIndex: initialIndex });
+    setHoveredPOI(null);
+    setIsPOILocked(false);
+  };
+
+  const closePOIPhotos = () => {
+    setSelectedPOIPhotos(null);
+  };
+
+  const nextPOIPhoto = () => {
+    if (selectedPOIPhotos && selectedPOIPhotos.photos.length > 0) {
+      setSelectedPOIPhotos({
+        ...selectedPOIPhotos,
+        selectedIndex: (selectedPOIPhotos.selectedIndex + 1) % selectedPOIPhotos.photos.length
+      });
+    }
+  };
+
+  const prevPOIPhoto = () => {
+    if (selectedPOIPhotos && selectedPOIPhotos.photos.length > 0) {
+      setSelectedPOIPhotos({
+        ...selectedPOIPhotos,
+        selectedIndex: (selectedPOIPhotos.selectedIndex - 1 + selectedPOIPhotos.photos.length) % selectedPOIPhotos.photos.length
+      });
+    }
   };
 
   useEffect(() => {
-    if (hoveredId !== null && hoveredType !== null) {
-      const itemElement = document.querySelector(`[data-${hoveredType}-id="${hoveredId}"]`);
-      if (itemElement) {
-        itemElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        itemElement.classList.add('bg-primary/10', 'transition-colors', 'duration-300');
+    const handleMapClick = () => {
+      if (isPOILocked) {
+        setHoveredPOI(null);
+        setIsPOILocked(false);
       }
-      return () => {
-        if (itemElement) {
-          itemElement.classList.remove('bg-primary/10', 'transition-colors', 'duration-300');
-        }
-      };
+    };
+
+    if (map) {
+      map.addListener('click', handleMapClick);
     }
-  }, [hoveredId, hoveredType]);
+
+    return () => {
+      if (map) {
+        google.maps.event.clearListeners(map, 'click');
+      }
+    };
+  }, [map, isPOILocked]);
+
+  const handlePoiMouseOver = (poi: any) => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+    }
+    if (!isPOILocked) {
+      setHoveredPOI(poi);
+    }
+  };
+
+  const handlePoiMouseOut = () => {
+    if (!isPOILocked) {
+      closeTimeoutRef.current = setTimeout(() => {
+        setHoveredPOI(null);
+      }, 1500);
+    }
+  };
 
   return (
     <div className="w-full h-full">
       <GoogleMap
+
         mapContainerStyle={defaultMapContainerStyle}
         center={center}
         zoom={defaultMapZoom}
@@ -241,13 +293,6 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
               marker.set('id', stop.id);
               marker.set('type', 'stop');
               markersRef.current[`stop-${stop.id}`] = marker;
-              const infoWindow = createInfoWindow(stop.name);
-              marker.addListener('mouseover', () => {
-                infoWindow.open(map, marker);
-              });
-              marker.addListener('mouseout', () => {
-                infoWindow.close();
-              });
             }}
           />
         ))}
@@ -263,13 +308,16 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
                   marker.set('id', poi.id);
                   marker.set('type', poi.category);
                   markersRef.current[`poi-${poi.id}`] = marker;
-                  const infoWindow = createInfoWindow(poi.name);
-                  marker.addListener('mouseover', () => {
-                    infoWindow.open(map, marker);
-                  });
-                  marker.addListener('mouseout', () => {
-                    infoWindow.close();
-                  });
+                }}
+                onMouseOver={() => handlePoiMouseOver(poi)}
+                onMouseOut={handlePoiMouseOut}
+                onClick={() => {
+                  if (hoveredPOI && hoveredPOI.id === poi.id) {
+                    setIsPOILocked(!isPOILocked);
+                  } else {
+                    setHoveredPOI(poi);
+                    setIsPOILocked(true);
+                  }
                 }}
               />
               <Polyline
@@ -279,16 +327,16 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
                 ]}
                 options={{
                   strokeColor: getColorForCategory(poi.category),
-                  strokeOpacity: 0.3,
-                  strokeWeight: 1,
+                  strokeOpacity: 0.5,
+                  strokeWeight: 1.5,
                   icons: [{
                     icon: {
                       path: 'M 0,-1 0,1',
-                      strokeOpacity: 0.5,
-                      scale: 2
+                      strokeOpacity: 1,
+                      scale: 3
                     },
                     offset: '0',
-                    repeat: '20px'
+                    repeat: '10px'
                   }]
                 }}
                 onLoad={(polyline) => {
@@ -306,7 +354,109 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
             strokeWeight: 3,
           }}
         />
+        {hoveredPOI && (
+          <InfoWindow
+            position={{ lat: hoveredPOI.latitude, lng: hoveredPOI.longitude }}
+            options={{ pixelOffset: new window.google.maps.Size(0, -30) }}
+            onMouseOver={() => {
+              if (closeTimeoutRef.current) {
+                clearTimeout(closeTimeoutRef.current);
+              }
+            }}
+            onMouseOut={handlePoiMouseOut}
+          >
+            <div className="p-2 w-32">
+              <div className="mb-2 text-center">
+                <h3 className="font-semibold text-sm leading-tight">{hoveredPOI.name}</h3>
+              </div>
+              <div
+                className="relative w-28 h-28 mx-auto cursor-pointer"
+                onClick={() => openPOIPhotos(hoveredPOI.id, hoveredPOI.photos)}
+              >
+                {hoveredPOI.photos.slice(0, 3).map((photo, photoIndex) => (
+                  <div
+                    key={photoIndex}
+                    className="absolute border-2 border-background rounded-xl overflow-hidden transition-transform hover:scale-105"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      top: `${photoIndex * 4}px`,
+                      left: `${photoIndex * 4}px`,
+                      zIndex: 3 - photoIndex,
+                      transform: photoIndex === 0 ? 'rotate(-5deg)' : photoIndex === 1 ? 'rotate(0deg)' : 'rotate(5deg)',
+                    }}
+                  >
+                    <Image
+                      src={photo}
+                      alt={`${hoveredPOI.name} photo ${photoIndex + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
+                {hoveredPOI.photos.length > 3 && (
+                  <div className="absolute bottom-0 right-0 bg-background text-foreground px-1 rounded-md text-xs font-medium">
+                    +{hoveredPOI.photos.length - 3}
+                  </div>
+                )}
+              </div>
+            </div>
+          </InfoWindow>
+        )}
       </GoogleMap>
+
+      <Dialog open={selectedPOIPhotos !== null} onOpenChange={closePOIPhotos}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0">
+          <div className="relative w-full h-[90vh]">
+            {selectedPOIPhotos && selectedPOIPhotos.photos[selectedPOIPhotos.selectedIndex] && (
+              <>
+                <div className="absolute inset-0">
+                  <Image
+                    src={selectedPOIPhotos.photos[selectedPOIPhotos.selectedIndex]}
+                    alt={`POI photo ${selectedPOIPhotos.selectedIndex + 1}`}
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
+                    priority
+                  />
+                </div>
+                <div className="absolute top-0 left-0 right-0 bg-background/80 backdrop-blur-sm p-4">
+                  <h3 className="text-lg font-semibold text-foreground">
+                    {poiCoordinates.find(poi => poi.id === selectedPOIPhotos.poiId)?.name}
+                  </h3>
+                </div>
+                {selectedPOIPhotos.photos.length > 1 && (
+                  <>
+                    <div className="absolute inset-y-0 left-2 flex items-center">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={prevPOIPhoto}
+                        className="bg-background/80 backdrop-blur-sm"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="absolute inset-y-0 right-2 flex items-center">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={nextPOIPhoto}
+                        className="bg-background/80 backdrop-blur-sm"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </>
+                )}
+                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm">
+                  {selectedPOIPhotos.selectedIndex + 1} / {selectedPOIPhotos.photos.length}
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
