@@ -5,7 +5,8 @@ import Image from 'next/image';
 import { GoogleMap, Marker, Polyline, InfoWindow } from "@react-google-maps/api";
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ChevronLeft, ChevronRight, Camera } from 'lucide-react'
 
 const defaultMapContainerStyle = {
   width: '100%',
@@ -265,14 +266,24 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
   const handlePoiMouseOut = () => {
     if (!isPOILocked) {
       closeTimeoutRef.current = setTimeout(() => {
+
         setHoveredPOI(null);
       }, 1500);
     }
   };
 
+  useEffect(() => {
+    if (map && hoveredPOI) {
+      const point = new google.maps.LatLng(hoveredPOI.latitude, hoveredPOI.longitude);
+      const bounds = map.getBounds();
+      if (bounds && !bounds.contains(point)) {
+        map.panTo(point);
+      }
+    }
+  }, [map, hoveredPOI]);
+
   return (
     <div className="w-full h-full">
-
       <GoogleMap
         mapContainerStyle={defaultMapContainerStyle}
         center={center}
@@ -358,8 +369,10 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
           <InfoWindow
             position={{ lat: hoveredPOI.latitude, lng: hoveredPOI.longitude }}
             options={{
-              pixelOffset: new window.google.maps.Size(0, -30),
-              disableAutoPan: true,
+              pixelOffset: new window.google.maps.Size(0, -20),
+              disableAutoPan: false,
+              maxWidth: 128,
+              closeBoxURL: '',
             }}
             onMouseOver={() => {
               if (closeTimeoutRef.current) {
@@ -368,42 +381,40 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
             }}
             onMouseOut={handlePoiMouseOut}
           >
-            <div className="p-2 w-40 h-48 overflow-hidden">
-              <div className="mb-2 text-center">
-                <h3 className="font-semibold text-sm leading-tight">{hoveredPOI.name}</h3>
-              </div>
-              <div
-                className="relative w-full h-36 mx-auto cursor-pointer"
-                onClick={() => openPOIPhotos(hoveredPOI.id, hoveredPOI.photos)}
-              >
-                {hoveredPOI.photos.slice(0, 3).map((photo, photoIndex) => (
-                  <div
-                    key={photoIndex}
-                    className="absolute border-2 border-background rounded-xl overflow-hidden transition-transform hover:scale-105"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      top: `${photoIndex * 4}px`,
-                      left: `${photoIndex * 4}px`,
-                      zIndex: 3 - photoIndex,
-                      transform: photoIndex === 0 ? 'rotate(-5deg)' : photoIndex === 1 ? 'rotate(0deg)' : 'rotate(5deg)',
-                    }}
-                  >
-                    <Image
-                      src={photo}
-                      alt={`${hoveredPOI.name} photo ${photoIndex + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
-                {hoveredPOI.photos.length > 3 && (
-                  <div className="absolute bottom-0 right-0 bg-background text-foreground px-1 rounded-md text-xs font-medium">
-                    +{hoveredPOI.photos.length - 3}
-                  </div>
-                )}
-              </div>
-            </div>
+            <Card className="w-32 shadow-none border-none">
+              <CardHeader className="p-2 pb-0 text-center">
+                <CardTitle className="text-sm font-semibold truncate">{hoveredPOI.name}</CardTitle>
+              </CardHeader>
+              <CardContent className="p-2">
+                <div
+                  className="relative w-full aspect-square rounded-md overflow-hidden cursor-pointer group"
+                  onClick={() => openPOIPhotos(hoveredPOI.id, hoveredPOI.photos)}
+                >
+                  {hoveredPOI.photos.length > 0 ? (
+                    <>
+                      <Image
+                        src={hoveredPOI.photos[0]}
+                        alt={`${hoveredPOI.name} main photo`}
+                        fill
+                        className="object-cover transition-transform group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Camera className="w-4 h-4 text-white" />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-full h-full bg-muted flex items-center justify-center">
+                      <Camera className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                  )}
+                  {hoveredPOI.photos.length > 1 && (
+                    <div className="absolute bottom-1 right-1 bg-background/80 backdrop-blur-sm px-1 py-0.5 rounded-full text-[10px] font-medium">
+                      +{hoveredPOI.photos.length - 1}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </InfoWindow>
         )}
       </GoogleMap>
