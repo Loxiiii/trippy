@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
-import { X, ChevronLeft, ChevronRight, Heart, MessageCircle, Share2, Utensils, Footprints, ShoppingBag, Landmark, Building2, Mountain, Building } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Map, Heart, MessageCircle, Share2, Utensils, Footprints, ShoppingBag, Landmark, Building2, Mountain, Building, ChevronDown } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
@@ -13,7 +13,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import  MapComponent from "@/components/map"
+import MapComponent from "@/components/map"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 type Stop = {
@@ -67,14 +67,14 @@ const getCategoryIcon = (category: PointOfInterest['category']) => {
   const iconMap: Record<PointOfInterest['category'], { icon: JSX.Element, className: string, hoverClass: string, label: string }> = {
     food: {
       icon: <Utensils className="h-4 w-4" />,
-      className: "bg-amber-500",
-      hoverClass: "hover:bg-amber-100",
+      className: "bg-orange-500",
+      hoverClass: "hover:bg-orange-100",
       label: "Food"
     },
     hike: {
       icon: <Footprints className="h-4 w-4" />,
-      className: "bg-emerald-500",
-      hoverClass: "hover:bg-emerald-100",
+      className: "bg-green-500",
+      hoverClass: "hover:bg-green-100",
       label: "Hike"
     },
     shop: {
@@ -85,26 +85,26 @@ const getCategoryIcon = (category: PointOfInterest['category']) => {
     },
     cultural_center: {
       icon: <Landmark className="h-4 w-4" />,
-      className: "bg-purple-500",
-      hoverClass: "hover:bg-purple-100",
+      className: "bg-pink-500",
+      hoverClass: "hover:bg-pink-100",
       label: "Cultural Center"
     },
     museum: {
       icon: <Building2 className="h-4 w-4" />,
-      className: "bg-slate-500",
-      hoverClass: "hover:bg-slate-100",
+      className: "bg-purple-500",
+      hoverClass: "hover:bg-purple-100",
       label: "Museum"
     },
     nature_sight: {
       icon: <Mountain className="h-4 w-4" />,
-      className: "bg-green-500",
-      hoverClass: "hover:bg-green-100",
+      className: "bg-yellow-500",
+      hoverClass: "hover:bg-yellow-100",
       label: "Nature Sight"
     },
     urban_sight: {
       icon: <Building className="h-4 w-4" />,
-      className: "bg-zinc-500",
-      hoverClass: "hover:bg-zinc-100",
+      className: "bg-cyan-500",
+      hoverClass: "hover:bg-cyan-100",
       label: "Urban Sight"
     },
   };
@@ -114,8 +114,10 @@ const getCategoryIcon = (category: PointOfInterest['category']) => {
 
 export default function TripPageClient({
   tripImages = [],
+  mapImageUrl = '',
   stops = [],
   comments = [],
+  pois = []
 }: TripPageClientProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
   const carouselRef = useRef<HTMLDivElement>(null)
@@ -250,6 +252,21 @@ export default function TripPageClient({
     setHoveredType(null);
   };
 
+  useEffect(() => {
+    if (hoveredId !== null && hoveredType !== null) {
+      const itemElement = document.querySelector(`[data-${hoveredType}-id="${hoveredId}"]`);
+      if (itemElement) {
+        itemElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        itemElement.classList.add('bg-primary/10', 'transition-colors', 'duration-300');
+      }
+      return () => {
+        if (itemElement) {
+          itemElement.classList.remove('bg-primary/10', 'transition-colors', 'duration-300');
+        }
+      };
+    }
+  }, [hoveredId, hoveredType]);
+
   return (
     <TooltipProvider>
       <>
@@ -337,7 +354,7 @@ export default function TripPageClient({
                                           {icon}
                                         </span>
                                         <span>{label}</span>
-                                        <span className="text-sm text-muted-foreground">({pois.length})</span>
+                                        <span className="text-sm  text-muted-foreground">({pois.length})</span>
                                       </div>
                                     </AccordionTrigger>
                                     <AccordionContent>

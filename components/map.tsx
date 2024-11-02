@@ -23,15 +23,15 @@ const createMarkerIcon = (id: number, category: string | null, isHovered: boolea
   const getColor = () => {
     if (category === null) return isHovered ? "#000000" : "#333333";
     const colorMap: Record<string, string> = {
-      food: '#f59e0b',
-      hike: '#10b981',
-      shop: '#3b82f6',
-      cultural_center: '#8b5cf6',
-      museum: '#64748b',
-      nature_sight: '#22c55e',
-      urban_sight: '#71717a',
+      food: '#FF9800',        // Orange
+      hike: '#4CAF50',        // Green
+      shop: '#2196F3',        // Blue
+      cultural_center: '#E91E63', // Pink
+      museum: '#9C27B0',      // Purple
+      nature_sight: '#FFEB3B', // Yellow
+      urban_sight: '#00BCD4', // Cyan
     };
-    return isHovered ? colorMap[category] : lightenColor(colorMap[category] || '#60a5fa', 20);
+    return isHovered ? colorMap[category] : lightenColor(colorMap[category] || '#607D8B', 20);
   };
 
   const getIcon = () => {
@@ -47,9 +47,9 @@ const createMarkerIcon = (id: number, category: string | null, isHovered: boolea
           </defs>
           <circle cx="${size/2}" cy="${size/2}" r="${size/2-2}" fill="white" filter="url(#shadow)"/>
           <circle cx="${size/2}" cy="${size/2}" r="${size/2-4}" fill="${getColor()}"/>
-          <text 
-            x="${size/2}" 
-            y="${size/2}" 
+          <text
+            x="${size/2}"
+            y="${size/2}"
             font-family="Arial, sans-serif"
             font-size="${size/2}"
             font-weight="bold"
@@ -130,7 +130,7 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
       const markerType = marker.get('type');
       const isHovered = hoveredId === markerId && hoveredType === markerType;
       marker.setIcon(createMarkerIcon(markerId, markerType === 'stop' ? null : markerType, isHovered));
-      
+
       if (isHovered) {
         marker.setZIndex(1000);
         animateMarker(marker);
@@ -172,7 +172,7 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
   const stopCoordinates = stops.map(stop => ({
     id: stop.id,
     latitude: stop.latitude,
-    longitude: stop.longitude, 
+    longitude: stop.longitude,
     name: stop.name
   }));
 
@@ -193,15 +193,15 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
 
   const getColorForCategory = (category: string) => {
     const colorMap: Record<string, string> = {
-      food: '#f5e0b',
-      hike: '#10b981',
-      shop: '#3b82f6',
-      cultural_center: '#8b5cf6',
-      museum: '#64748b',
-      nature_sight: '#22c55e',
-      urban_sight: '#71717a',
+      food: '#FF9800',        // Orange
+      hike: '#4CAF50',        // Green
+      shop: '#2196F3',        // Blue
+      cultural_center: '#E91E63', // Pink
+      museum: '#9C27B0',      // Purple
+      nature_sight: '#FFEB3B', // Yellow
+      urban_sight: '#00BCD4', // Cyan
     };
-    return colorMap[category] || '#60a5fa';
+    return colorMap[category] || '#607D8B'; // Default to a neutral blue-grey
   };
 
   useEffect(() => {
