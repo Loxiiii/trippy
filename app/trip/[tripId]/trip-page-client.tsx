@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
-import { X, ChevronLeft, ChevronRight, Map, Heart, MessageCircle, Share2, Utensils, Footprints, ShoppingBag, Landmark, Building2, Mountain, Building, ChevronDown } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Heart, MessageCircle, Share2, Utensils, Footprints, ShoppingBag, Landmark, Building2, Mountain, Building } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
@@ -114,10 +114,8 @@ const getCategoryIcon = (category: PointOfInterest['category']) => {
 
 export default function TripPageClient({
   tripImages = [],
-  mapImageUrl = '',
   stops = [],
   comments = [],
-  pois = []
 }: TripPageClientProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
   const carouselRef = useRef<HTMLDivElement>(null)
