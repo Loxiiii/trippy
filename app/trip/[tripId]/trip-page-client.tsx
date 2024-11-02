@@ -13,7 +13,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { MapComponent } from "@/components/map"
+import  MapComponent from "@/components/map"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 type Stop = {
@@ -65,43 +65,43 @@ type TripPageClientProps = {
 
 const getCategoryIcon = (category: PointOfInterest['category']) => {
   const iconMap: Record<PointOfInterest['category'], { icon: JSX.Element, className: string, hoverClass: string, label: string }> = {
-    food: { 
+    food: {
       icon: <Utensils className="h-4 w-4" />,
       className: "bg-amber-500",
       hoverClass: "hover:bg-amber-100",
       label: "Food"
     },
-    hike: { 
+    hike: {
       icon: <Footprints className="h-4 w-4" />,
       className: "bg-emerald-500",
       hoverClass: "hover:bg-emerald-100",
       label: "Hike"
     },
-    shop: { 
+    shop: {
       icon: <ShoppingBag className="h-4 w-4" />,
       className: "bg-blue-500",
       hoverClass: "hover:bg-blue-100",
       label: "Shop"
     },
-    cultural_center: { 
+    cultural_center: {
       icon: <Landmark className="h-4 w-4" />,
       className: "bg-purple-500",
       hoverClass: "hover:bg-purple-100",
       label: "Cultural Center"
     },
-    museum: { 
+    museum: {
       icon: <Building2 className="h-4 w-4" />,
       className: "bg-slate-500",
       hoverClass: "hover:bg-slate-100",
       label: "Museum"
     },
-    nature_sight: { 
+    nature_sight: {
       icon: <Mountain className="h-4 w-4" />,
       className: "bg-green-500",
       hoverClass: "hover:bg-green-100",
       label: "Nature Sight"
     },
-    urban_sight: { 
+    urban_sight: {
       icon: <Building className="h-4 w-4" />,
       className: "bg-zinc-500",
       hoverClass: "hover:bg-zinc-100",
@@ -112,10 +112,10 @@ const getCategoryIcon = (category: PointOfInterest['category']) => {
   return iconMap[category] || { icon: null, className: "bg-primary", hoverClass: "hover:bg-primary-100", label: "Other" };
 };
 
-export default function TripPageClient({ 
-  tripImages = [], 
-  mapImageUrl = '', 
-  stops = [], 
+export default function TripPageClient({
+  tripImages = [],
+  mapImageUrl = '',
+  stops = [],
   comments = [],
   pois = []
 }: TripPageClientProps) {
@@ -274,7 +274,7 @@ export default function TripPageClient({
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
-            <div 
+            <div
               ref={carouselRef}
               className="flex overflow-x-auto space-x-4 pb-4 snap-x snap-mandatory no-scrollbar"
               style={{ scrollBehavior: 'smooth', cursor: isDragging ? 'grabbing' : 'grab' }}
@@ -306,7 +306,7 @@ export default function TripPageClient({
                   {stops.map((stop) => {
                     const groupedPOIs = groupPOIsByCategory(stop.pois);
                     return (
-                      <AccordionItem key={stop.id} 
+                      <AccordionItem key={stop.id}
                                      value={`stop-${stop.id}`}
                                      onMouseEnter={() => handleHover(stop.id, 'stop')}
                                      onMouseLeave={handleHoverEnd}
@@ -346,7 +346,7 @@ export default function TripPageClient({
                                       {pois.map((poi) => (
                                         <Tooltip key={poi.id}>
                                           <TooltipTrigger asChild>
-                                            <div 
+                                            <div
                                               className={`mb-4 last:mb-0 flex items-start rounded-md p-2 transition-colors ${hoverClass} cursor-pointer`}
                                               onMouseEnter={() => handleHover(poi.id, 'poi')}
                                               onMouseLeave={handleHoverEnd}
@@ -355,10 +355,10 @@ export default function TripPageClient({
                                               <div className="flex-grow">
                                                 <h5 className="font-medium mb-1">{poi.name}</h5>
                                                 <p className="text-sm text-muted-foreground mb-2">{poi.description}</p>
-                                              
+
                                               </div>
                                               {poi.photos && poi.photos.length > 0 && (
-                                                <div 
+                                                <div
                                                   className="relative w-20 h-20 flex-shrink-0 cursor-pointer ml-4"
                                                   onClick={() => openPOIPhotos(poi.id, poi.photos)}
                                                 >
@@ -413,9 +413,9 @@ export default function TripPageClient({
             <Card className="aspect-square overflow-hidden">
               <CardContent className="p-0 h-full relative">
                 <div className="w-full h-full">
-                  <MapComponent 
-                    stops={stops} 
-                    center={mapProps.center} 
+                  <MapComponent
+                    stops={stops}
+                    center={mapProps.center}
                     bounds={mapProps.bounds}
                     hoveredId={hoveredId}
                     hoveredType={hoveredType}
