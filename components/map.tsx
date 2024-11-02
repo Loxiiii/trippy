@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ChevronLeft, ChevronRight, Camera, MapPin, Clock, Calendar } from 'lucide-react'
+import { ChevronLeft, ChevronRight, MapPin, Clock, Calendar } from 'lucide-react'
 
 const defaultMapContainerStyle = {
   width: '100%',
@@ -107,6 +107,7 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
     selectedIndex: number;
   } | null>(null);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [activeStopId, setActiveStopId] = useState<number | null>(null);
 
   useEffect(() => {
     if (map) {
@@ -204,14 +205,14 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
     }
   };
 
-  useEffect(() => {
-    const handleMapClick = () => {
-      if (isPOILocked) {
-        setHoveredPOI(null);
-        setIsPOILocked(false);
-      }
-    };
+  const handleMapClick = () => {
+    setActiveStopId(null);
+    setHoveredPOI(null);
+    setIsPOILocked(false);
+    hideAllPolylines();
+  };
 
+  useEffect(() => {
     if (map) {
       map.addListener('click', handleMapClick);
     }
@@ -221,7 +222,7 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
         google.maps.event.clearListeners(map, 'click');
       }
     };
-  }, [map, isPOILocked]);
+  }, [map]);
 
   const handlePoiMouseOver = (poi: any) => {
     if (closeTimeoutRef.current) {
@@ -243,6 +244,33 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
     }
   };
 
+  const handleStopClick = (stopId: number) => {
+    if (activeStopId === stopId) {
+      setActiveStopId(null);
+      hideAllPolylines();
+    } else {
+      setActiveStopId(stopId);
+      showPolylinesForStop(stopId);
+    }
+  };
+
+  const hideAllPolylines = () => {
+    Object.values(linesRef.current).forEach(line => {
+      line.setVisible(false);
+    });
+  };
+
+  const showPolylinesForStop = (stopId: number) => {
+    hideAllPolylines();
+    Object.entries(linesRef.current).forEach(([key, line]) => {
+      const poiId = parseInt(key.split('-')[1]);
+      const poi = poiCoordinates.find(p => p.id === poiId);
+      if (poi && poi.stopId === stopId) {
+        line.setVisible(true);
+      }
+    });
+  };
+
   useEffect(() => {
     if (map && hoveredPOI) {
       const point = new google.maps.LatLng(hoveredPOI.latitude, hoveredPOI.longitude);
@@ -251,7 +279,17 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
         map.panTo(point);
       }
     }
-  }, [map, hoveredPOI]);
+  }, [map,
+
+ hoveredPOI]);
+
+  useEffect(() => {
+    if (activeStopId === null) {
+      hideAllPolylines();
+    } else {
+      showPolylinesForStop(activeStopId);
+    }
+  }, [activeStopId]);
 
   return (
     <div className="w-full h-full">
@@ -276,14 +314,15 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
               marker.set('type', 'stop');
               markersRef.current[`stop-${stop.id}`] = marker;
             }}
+            onClick={() => handleStopClick(stop.id)}
           />
         ))}
         {poiCoordinates.map(poi => {
           const stopForPoi = stops.find(stop => stop.id === poi.stopId);
           return (
-            <React.Fragment  key={`poi-${poi.id}`}>
+            <React.Fragment key={`poi-${poi.id}`}>
               <Marker
-                position={{ lat: poi.latitude, lng:  poi.longitude }}
+                position={{ lat: poi.latitude, lng: poi.longitude }}
                 icon={createMarkerIcon(poi.id, poi.category, hoveredId === poi.id && hoveredType === 'poi')}
                 title={poi.name}
                 onLoad={(marker) => {
@@ -311,6 +350,7 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
                   strokeColor: getColorForCategory(poi.category),
                   strokeOpacity: 0.5,
                   strokeWeight: 1.5,
+                  visible: activeStopId === poi.stopId,
                   icons: [{
                     icon: {
                       path: 'M 0,-1 0,1',
