@@ -34,22 +34,16 @@ const createMarkerIcon = (id: number, category: string | null, isHovered: boolea
 
   const getIcon = () => {
     if (category === null) {
-      // Stop marker with centered number
       const size = isHovered ? 40 : 32;
       return `
         <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.3"/>
-            </filter>
-          </defs>
-          <circle cx="${size/2}" cy="${size/2}" r="${size/2-2}" fill="white" filter="url(#shadow)"/>
-          <circle cx="${size/2}" cy="${size/2}" r="${size/2-4}" fill="${getColor()}"/>
+          <circle cx="${size/2}" cy="${size/2}" r="${size/2-2}" fill="white" />
+          <circle cx="${size/2}" cy="${size/2}" r="${size/2-4}" fill="${getColor()}" />
           <text
             x="${size/2}"
             y="${size/2}"
             font-family="Arial, sans-serif"
-            font-size="${size/2}"
+            font-size="${size/2-4}"
             font-weight="bold"
             fill="white"
             text-anchor="middle"
@@ -59,8 +53,7 @@ const createMarkerIcon = (id: number, category: string | null, isHovered: boolea
       `;
     }
 
-    // POI marker with icon
-    const size = isHovered ? 32 : 24;
+    const size = isHovered ? 28 : 20;
     const iconSize = size * 0.5;
     const iconMap: Record<string, string> = {
       food: 'M12,2A3,3,0,0,0,9,5V8H7V5A3,3,0,0,0,1,5V8A3,3,0,0,0,4,11V22H8V11A3,3,0,0,0,11,8V5A3,3,0,0,0,12,2M16,2A3,3,0,0,0,13,5V8H15V5A1,1,0,0,1,17,5V8H19V5A3,3,0,0,0,16,2M22,19H14V22H22V19Z',
@@ -74,13 +67,8 @@ const createMarkerIcon = (id: number, category: string | null, isHovered: boolea
 
     return `
       <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.3"/>
-          </filter>
-        </defs>
-        <circle cx="${size/2}" cy="${size/2}" r="${size/2-2}" fill="white" filter="url(#shadow)"/>
-        <circle cx="${size/2}" cy="${size/2}" r="${size/2-4}" fill="${getColor()}"/>
+        <circle cx="${size/2}" cy="${size/2}" r="${size/2-2}" fill="white" />
+        <circle cx="${size/2}" cy="${size/2}" r="${size/2-4}" fill="${getColor()}" />
         <g transform="translate(${(size-iconSize)/2}, ${(size-iconSize)/2}) scale(${iconSize/24})">
           <path d="${iconMap[category]}" fill="white"/>
         </g>
@@ -150,30 +138,11 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
 
       if (isHovered) {
         marker.setZIndex(1000);
-        animateMarker(marker);
       } else {
         marker.setZIndex(undefined);
       }
     });
   }, [hoveredId, hoveredType]);
-
-  const animateMarker = (marker: google.maps.Marker) => {
-    let start: number | null = null;
-    const duration = 300;
-    const animate = (timestamp: number) => {
-      if (!start) start = timestamp;
-      const progress = (timestamp - start) / duration;
-      const scale = 1 + Math.sin(progress * Math.PI) * 0.3;
-      marker.setIcon({
-        ...marker.getIcon() as google.maps.Icon,
-        scaledSize: new google.maps.Size(32 * scale, 32 * scale),
-      });
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
-    requestAnimationFrame(animate);
-  };
 
   const stopCoordinates = stops.map(stop => ({
     id: stop.id,
@@ -311,7 +280,7 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
           return (
             <React.Fragment key={`poi-${poi.id}`}>
               <Marker
-                position={{ lat: poi.latitude, lng: poi.longitude }}
+                position={{ lat: poi.latitude, lng:  poi.longitude }}
                 icon={createMarkerIcon(poi.id, poi.category, hoveredId === poi.id && hoveredType === 'poi')}
                 title={poi.name}
                 onLoad={(marker) => {
@@ -370,7 +339,7 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
             options={{
               pixelOffset: new window.google.maps.Size(0, -20),
               disableAutoPan: false,
-              maxWidth: 300,
+              maxWidth: 240,
               closeBoxURL: '',
             }}
             onMouseOver={() => {
@@ -380,53 +349,40 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
             }}
             onMouseOut={handlePoiMouseOut}
           >
-            <Card className="w-[280px] shadow-none border-none overflow-hidden">
-              <CardContent className="p-4">
-                <div className="flex items-start gap-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold mb-2">{hoveredPOI.name}</h3>
-                    <Badge
-                      variant="secondary"
-                      className="mb-2"
-                      style={{
-                        backgroundColor: getColorForCategory(hoveredPOI.category),
-                        color: 'white'
-                      }}
-                    >
-                      {hoveredPOI.category}
-                    </Badge>
-                    <p className="text-sm text-muted-foreground mb-4">{hoveredPOI.description}</p>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                      <Calendar className="w-4 h-4" />
-                      <span>{hoveredPOI.visitDate}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                      <Clock className="w-4 h-4" />
-                      <span>{hoveredPOI.visitDuration}</span>
-                    </div>
+            <Card className="w-[220px] shadow-none border-none overflow-hidden">
+              <CardContent className="p-3">
+                <h3 className="text-sm font-semibold mb-1 truncate">{hoveredPOI.name}</h3>
+                <Badge
+                  variant="secondary"
+                  className="mb-2 text-[10px] px-1 py-0"
+                  style={{
+                    backgroundColor: getColorForCategory(hoveredPOI.category),
+                    color: 'white'
+                  }}
+                >
+                  {hoveredPOI.category}
+                </Badge>
+                {hoveredPOI.photos && hoveredPOI.photos.length > 0 && (
+                  <div
+                    className="relative w-full h-24 rounded-md overflow-hidden cursor-pointer mb-2"
+                    onClick={() => openPOIPhotos(hoveredPOI)}
+                  >
+                    <Image
+                      src={hoveredPOI.photos[0]}
+                      alt={`${hoveredPOI.name} thumbnail`}
+                      fill
+                      className="object-cover"
+                    />
+                    {hoveredPOI.photos.length > 1 && (
+                      <div className="absolute bottom-1 right-1 bg-black bg-opacity-50 text-white text-xs font-medium px-1 py-0.5 rounded-full">
+                        +{hoveredPOI.photos.length - 1}
+                      </div>
+                    )}
                   </div>
-                  {hoveredPOI.photos && hoveredPOI.photos.length > 0 && (
-                    <div
-                      className="relative w-20 h-20 rounded-md overflow-hidden cursor-pointer"
-                      onClick={() => openPOIPhotos(hoveredPOI)}
-                    >
-                      <Image
-                        src={hoveredPOI.photos[0]}
-                        alt={`${hoveredPOI.name} thumbnail`}
-                        fill
-                        className="object-cover"
-                      />
-                      {hoveredPOI.photos.length > 1 && (
-                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                          <span className="text-white text-sm font-medium">+{hoveredPOI.photos.length - 1}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+                )}
                 <Button
                   variant="secondary"
-                  className="w-full mt-4"
+                  className="w-full text-xs py-1 h-auto"
                   onClick={() => openPOIPhotos(hoveredPOI)}
                 >
                   View Details
@@ -438,14 +394,14 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
       </GoogleMap>
 
       <Dialog open={selectedPOIPhotos !== null} onOpenChange={closePOIPhotos}>
-        <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
-          <DialogHeader className="p-6">
-            <DialogTitle className="text-2xl font-bold">{selectedPOIPhotos?.name}</DialogTitle>
+        <DialogContent className="max-w-md max-h-[90vh] p-0 overflow-hidden">
+          <DialogHeader className="p-4">
+            <DialogTitle className="text-lg font-bold">{selectedPOIPhotos?.name}</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col md:flex-row h-full">
-            <div className="w-full md:w-2/3 relative">
+          <div className="flex flex-col h-full">
+            <div className="w-full relative">
               {selectedPOIPhotos && selectedPOIPhotos.photos[selectedPOIPhotos.selectedIndex] && (
-                <div className="relative w-full h-[50vh] md:h-[70vh]">
+                <div className="relative w-full h-[40vh]">
                   <Image
                     src={selectedPOIPhotos.photos[selectedPOIPhotos.selectedIndex]}
                     alt={`POI photo ${selectedPOIPhotos.selectedIndex + 1}`}
@@ -474,17 +430,17 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
                       </Button>
                     </>
                   )}
-                  <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm">
+                  <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-background/80 backdrop-blur-sm px-2 py-1 rounded-full text-xs">
                     {selectedPOIPhotos.selectedIndex + 1} / {selectedPOIPhotos.photos.length}
                   </div>
                 </div>
               )}
             </div>
-            <div className="w-full md:w-1/3 p-6">
-              <ScrollArea className="h-[calc(70vh-4rem)]">
+            <div className="p-4">
+              <ScrollArea className="h-[30vh]">
                 <Badge
                   variant="secondary"
-                  className="mb-4"
+                  className="mb-2"
                   style={{
                     backgroundColor: getColorForCategory(selectedPOIPhotos?.category || ''),
                     color: 'white'
@@ -492,22 +448,21 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
                 >
                   {selectedPOIPhotos?.category}
                 </Badge>
-                <h3 className="text-xl font-semibold mb-4">{selectedPOIPhotos?.name}</h3>
-                <p className="text-sm text-muted-foreground mb-6">
+                <p className="text-sm text-muted-foreground mb-4">
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                 </p>
-                <div className="space-y-4">
+                <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-muted-foreground" />
-                    <span className="text-sm">123 Example Street, City, Country</span>
+                    <MapPin className="w-4 h-4 text-muted-foreground" />
+                    <span>123 Example Street, City, Country</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-muted-foreground" />
-                    <span className="text-sm">Visit Date: June 15, 2023</span>
+                    <Calendar className="w-4 h-4 text-muted-foreground" />
+                    <span>Visit Date: June 15, 2023</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-muted-foreground" />
-                    <span className="text-sm">Duration: 2 hours</span>
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                    <span>Duration: 2 hours</span>
                   </div>
                 </div>
               </ScrollArea>
