@@ -235,8 +235,11 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
   const handlePoiMouseOut = () => {
     if (!isPOILocked) {
       closeTimeoutRef.current = setTimeout(() => {
-        setHoveredPOI(null);
-      }, 1500);
+        const infoWindow = document.querySelector('.gm-style-iw-c');
+        if (!infoWindow || !infoWindow.matches(':hover')) {
+          setHoveredPOI(null);
+        }
+      }, 300);
     }
   };
 
@@ -278,7 +281,7 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
         {poiCoordinates.map(poi => {
           const stopForPoi = stops.find(stop => stop.id === poi.stopId);
           return (
-            <React.Fragment key={`poi-${poi.id}`}>
+            <React.Fragment  key={`poi-${poi.id}`}>
               <Marker
                 position={{ lat: poi.latitude, lng:  poi.longitude }}
                 icon={createMarkerIcon(poi.id, poi.category, hoveredId === poi.id && hoveredType === 'poi')}
@@ -339,54 +342,58 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
             options={{
               pixelOffset: new window.google.maps.Size(0, -20),
               disableAutoPan: false,
-              maxWidth: 240,
-              closeBoxURL: '',
+              maxWidth: 260,
             }}
-            onMouseOver={() => {
-              if (closeTimeoutRef.current) {
-                clearTimeout(closeTimeoutRef.current);
-              }
+            onCloseClick={() => {
+              setHoveredPOI(null);
+              setIsPOILocked(false);
             }}
-            onMouseOut={handlePoiMouseOut}
           >
-            <Card className="w-[220px] shadow-none border-none overflow-hidden">
+            <Card className="w-[240px] shadow-none border-none overflow-hidden">
               <CardContent className="p-3">
-                <h3 className="text-sm font-semibold mb-1 truncate">{hoveredPOI.name}</h3>
-                <Badge
-                  variant="secondary"
-                  className="mb-2 text-[10px] px-1 py-0"
-                  style={{
-                    backgroundColor: getColorForCategory(hoveredPOI.category),
-                    color: 'white'
-                  }}
-                >
-                  {hoveredPOI.category}
-                </Badge>
-                {hoveredPOI.photos && hoveredPOI.photos.length > 0 && (
-                  <div
-                    className="relative w-full h-24 rounded-md overflow-hidden cursor-pointer mb-2"
+                <div className="flex flex-col gap-2">
+                  <div>
+                    <h3 className="text-base font-semibold mb-1">{hoveredPOI.name}</h3>
+                    <Badge
+                      variant="secondary"
+                      className="text-xs px-2 py-0.5"
+                      style={{
+                        backgroundColor: getColorForCategory(hoveredPOI.category),
+                        color: 'white'
+                      }}
+                    >
+                      {hoveredPOI.category}
+                    </Badge>
+                  </div>
+                  {hoveredPOI.photos && hoveredPOI.photos.length > 0 && (
+                    <div
+                      className="relative w-full h-24 rounded-md overflow-hidden cursor-pointer mt-2"
+                      onClick={() => openPOIPhotos(hoveredPOI)}
+                    >
+                      <Image
+                        src={hoveredPOI.photos[0]}
+                        alt={`${hoveredPOI.name} thumbnail`}
+                        fill
+                        className="object-cover"
+                      />
+                      <div className="absolute bottom-1 right-1 bg-black bg-opacity-50 text-white text-xs font-medium px-1 py-0.5 rounded-full">
+                        {hoveredPOI.photos.length} photos
+                      </div>
+                    </div>
+                  )}
+                  <p className="text-sm text-muted-foreground line-clamp-2">{hoveredPOI.description}</p>
+                  <div className="text-xs text-muted-foreground">
+                    <p>{hoveredPOI.visitDate}</p>
+                    <p>{hoveredPOI.visitDuration}</p>
+                  </div>
+                  <Button
+                    variant="secondary"
+                    className="w-full mt-2"
                     onClick={() => openPOIPhotos(hoveredPOI)}
                   >
-                    <Image
-                      src={hoveredPOI.photos[0]}
-                      alt={`${hoveredPOI.name} thumbnail`}
-                      fill
-                      className="object-cover"
-                    />
-                    {hoveredPOI.photos.length > 1 && (
-                      <div className="absolute bottom-1 right-1 bg-black bg-opacity-50 text-white text-xs font-medium px-1 py-0.5 rounded-full">
-                        +{hoveredPOI.photos.length - 1}
-                      </div>
-                    )}
-                  </div>
-                )}
-                <Button
-                  variant="secondary"
-                  className="w-full text-xs py-1 h-auto"
-                  onClick={() => openPOIPhotos(hoveredPOI)}
-                >
-                  View Details
-                </Button>
+                    View Details
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </InfoWindow>
