@@ -272,8 +272,8 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
 
   return (
     <div className="w-full h-full">
-      <GoogleMap
 
+      <GoogleMap
         mapContainerStyle={defaultMapContainerStyle}
         center={center}
         zoom={defaultMapZoom}
@@ -357,7 +357,10 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
         {hoveredPOI && (
           <InfoWindow
             position={{ lat: hoveredPOI.latitude, lng: hoveredPOI.longitude }}
-            options={{ pixelOffset: new window.google.maps.Size(0, -30) }}
+            options={{
+              pixelOffset: new window.google.maps.Size(0, -30),
+              disableAutoPan: true,
+            }}
             onMouseOver={() => {
               if (closeTimeoutRef.current) {
                 clearTimeout(closeTimeoutRef.current);
@@ -365,12 +368,12 @@ export default function MapComponent({ stops, center, bounds, hoveredId, hovered
             }}
             onMouseOut={handlePoiMouseOut}
           >
-            <div className="p-2 w-32">
+            <div className="p-2 w-40 h-48 overflow-hidden">
               <div className="mb-2 text-center">
                 <h3 className="font-semibold text-sm leading-tight">{hoveredPOI.name}</h3>
               </div>
               <div
-                className="relative w-28 h-28 mx-auto cursor-pointer"
+                className="relative w-full h-36 mx-auto cursor-pointer"
                 onClick={() => openPOIPhotos(hoveredPOI.id, hoveredPOI.photos)}
               >
                 {hoveredPOI.photos.slice(0, 3).map((photo, photoIndex) => (
